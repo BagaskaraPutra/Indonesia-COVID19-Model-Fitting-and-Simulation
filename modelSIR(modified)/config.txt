@@ -1,0 +1,13 @@
+[allStateName]:
+S
+I
+r
+D
+[fitStateName]:
+I
+r
+D
+[paramName]:
+beta
+gamma
+muI
