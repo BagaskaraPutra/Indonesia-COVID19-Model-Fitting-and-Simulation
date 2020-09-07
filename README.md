@@ -5,7 +5,7 @@ This script uses the *lsqcurvefit* fitting algorithm inspired by [ECheynet](http
 It is compatible for both Octave 6.0.90 and Matlab.
 ## Octave 6.0.90 dependencies
 Install Octave 6.0.90 from the [GNU Octave website](https://ftp.gnu.org/gnu/octave/)\
-Install these packages through the Command Window:\
+Install these packages through the Command Window:
 ```
 pkg install -forge io
 pkg install -forge statistics
