@@ -1,0 +1,6 @@
+Problem:
+Matlab can successfully read csv in table form using readtable()
+Octave can successfully read csv using importdata() resulting in a struct with 2 elements: textdata & data
+Solution:
+Make 2 versions
+{DONE}

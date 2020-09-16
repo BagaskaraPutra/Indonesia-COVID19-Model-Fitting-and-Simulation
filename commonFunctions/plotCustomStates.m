@@ -4,11 +4,15 @@ function k = plotCustomStates(k,stateNamePlot,model, hFig,cursorMaxIndex)
         dcmObj = datacursormode(hFig);
     end
     nameArray = {'Color','LineStyle','linewidth'};
-    plotIndex = [];
+    plotCustEstIndex = [];
+    plotCustFitIndex = [];
     for ip=1:numel(stateNamePlot)
         for jp=1:numel(model.allStateName)
             if(strcmp(model.allStateName{jp},stateNamePlot{ip}))
-                plotIndex = [plotIndex jp];
+                plotCustEstIndex = [plotCustEstIndex jp];
+                if(find(strcmp(model.fitStateName,stateNamePlot{ip})))
+                    plotCustFitIndex = [plotCustFitIndex jp];
+                end                
             end
         end
     end
@@ -25,16 +29,17 @@ function k = plotCustomStates(k,stateNamePlot,model, hFig,cursorMaxIndex)
     
     function kebijakan = plotCustomStatesPerKebijakan(kebijakan,stateNamePlot,model,cursorKebijakan)
         fitLegend = {};
-        for i=1:numel(plotIndex)
-            fitLegend{i} = [model.allStateName{plotIndex(i)} ' (fitting)'];
-        end
         estLegend = {};
-        for i=1:numel(plotIndex)
-            estLegend{i} = [model.allStateName{plotIndex(i)} ' (estimated)'];
-        end
         fitStates = [];
-        for i=1:numel(plotIndex)
-            fitStates = [fitStates; getfield(kebijakan,model.allStateName{plotIndex(i)})];
+        for i=1:numel(plotCustEstIndex)
+            estLegend{i} = [model.allStateName{plotCustEstIndex(i)} ' (estimated)'];
+%             if(find(strcmp(model.fitStateName,model.allStateName{plotCustEstIndex(i)})))
+%                 
+%             end
+        end
+        for i=1:numel(plotCustFitIndex)
+            fitLegend{i} = [model.allStateName{plotCustFitIndex(i)} ' (fitting)'];
+            fitStates = [fitStates; getfield(kebijakan,model.allStateName{plotCustFitIndex(i)})];
         end
         
         if(softwareName == 'matlab')
@@ -50,23 +55,23 @@ function k = plotCustomStates(k,stateNamePlot,model, hFig,cursorMaxIndex)
             datetick('x','dd-mm-yyyy');
         end
         
-        set(fitPlot,nameArray,kebijakan.stateLineProp(plotIndex,:)); grid on;
+        set(fitPlot,nameArray,kebijakan.stateLineProp(plotCustFitIndex,:)); grid on;
         hold on
         
         if(softwareName == 'matlab')
             for j=1:numel(kebijakan.timeSim)
               matlabTimeSim(j) = datetime(kebijakan.timeSim{j});
             end
-            estPlot = plot(matlabTimeSim,kebijakan.Yest(:,plotIndex)); 
+            estPlot = plot(matlabTimeSim,kebijakan.Yest(:,plotCustEstIndex)); 
         else
             for j=1:numel(kebijakan.timeSim)
               epochTimeSim(j) = datenum(kebijakan.timeSim{j});
             end
-            estPlot = plot(epochTimeSim,kebijakan.Yest(:,plotIndex)); 
+            estPlot = plot(epochTimeSim,kebijakan.Yest(:,plotCustEstIndex)); 
             datetick('x','dd-mm-yyyy');    
         end
         
-        set(estPlot,nameArray,kebijakan.stateLineProp(plotIndex,:)); grid on;
+        set(estPlot,nameArray,kebijakan.stateLineProp(plotCustEstIndex,:)); grid on;
         hold on
         kebijakan.plotHandler = [fitPlot' estPlot'];
         kebijakan.varName = [fitLegend estLegend];

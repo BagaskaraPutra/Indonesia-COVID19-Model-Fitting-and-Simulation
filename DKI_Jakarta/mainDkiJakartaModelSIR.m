@@ -30,7 +30,7 @@ model.name = 'SIR(modified)';
 model.dir = ['../modelSIR(modified)'];
 model = loadModel(model);
 global Npop; Npop = 10770487; % DKI Jakarta total population
-kapasitasRS = 12150; % dari kapasitas RS 70% pada 28 Agustus 2020
+% kapasitasRS = 12150; % dari kapasitas RS 70% pada 28 Agustus 2020
 
 % [EDITABLE] Kebijakan: disimpan dalam cell struct k{i}, di mana i adalah urutan kebijakan
 % ubah startDate & endDate sesuai kebijakan. Jika tidak tahu endDate, tidak usah diisi, data terakhir yang diambil.
@@ -51,7 +51,7 @@ rfi = numel(k); % real fitting index: indeks kebijakan terakhir yang merupakan d
 
 lockdown.index = rfi+1;
 % lockdown.startDate = '2020-07-27';
-lockdown.startDate = '2020-09-05'; 
+lockdown.startDate = '2020-09-14'; 
 % lockdown.startDate = '2020-11-24'; 
 % lockdown.startDate = '2020-12-25'; 
 % lockdown.startDate = '2021-02-08'; 
@@ -69,6 +69,7 @@ k{lockdown.index+1}.numDays = postlockdown.numDays;
 
 % Inisialisasi semua state berdasarkan model.allStateName baik ada data fitting maupun tidak
 for i=1:numel(k)
+    k{i}.y0 = zeros(1,numel(model.allStateName));
     for j=1:numel(model.allStateName)
         k{i}.(model.allStateName{j}) = zeros(1,1);
     end
@@ -165,7 +166,7 @@ for i=2:rfi
     end
     % use initial fitting data from previous segment simulation
     for j=1:numel(nonFitIndex)
-        k{i}.y0(j) = k{i-1}.Yest(findIndexFromCell(k{i-1}.timeSim,datetime(k{i}.startDate)),j);
+        k{i}.y0(nonFitIndex(j)) = k{i-1}.Yest(findIndexFromCell(k{i-1}.timeSim,datetime(k{i}.startDate)),nonFitIndex(j));
     end
     
     % Fitting of the model to real data
@@ -191,8 +192,10 @@ else
         k{lockdown.index}.y0(find(strcmp(model.allStateName, model.fitStateName{i}))) = k{rfi}.(model.fitStateName{i})(findIndexFromCell(k{rfi}.timeFit,datetime(k{lockdown.index}.startDate)));
     end
 end
-notS = sum(k{lockdown.index}.y0); % jumlah selain yang susceptible
-k{lockdown.index}.y0(find(strcmp(model.allStateName, 'S'))) = Npop - notS;
+% use initial fitting data from previous segment simulation
+for j=1:numel(nonFitIndex)
+    k{lockdown.index}.y0(nonFitIndex(j)) = k{lockdown.index-1}.Yest(findIndexFromCell(k{lockdown.index-1}.timeSim,datetime(k{lockdown.index}.startDate)),nonFitIndex(j));
+end
 k{lockdown.index}.paramEst = k{rfi}.paramEst; % set parameter sama seperti kebijakan sebelumnya,
 k{lockdown.index}.paramEst(find(strcmp(model.paramName, 'beta'))) = 0; % namun nilai beta di-set nol
 k{lockdown.index} = simulateModel(k{lockdown.index},k{lockdown.index}.paramEst,model);

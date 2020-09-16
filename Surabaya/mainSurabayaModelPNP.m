@@ -59,6 +59,7 @@ k{lockdown.index+1}.numDays = postlockdown.numDays;
 
 % Inisialisasi semua state berdasarkan model.allStateName baik ada data fitting maupun tidak
 for i=1:numel(k)
+    k{i}.y0 = zeros(1,numel(model.allStateName));
     for j=1:numel(model.allStateName)
         k{i}.(model.allStateName{j}) = zeros(1,1);
     end
@@ -146,7 +147,7 @@ for i=2:rfi
     end
     % use initial fitting data from previous segment simulation
     for j=1:numel(nonFitIndex)
-        k{i}.y0(j) = k{i-1}.Yest(find(k{i-1}.timeSim == k{i}.startDate),j);
+        k{i}.y0(nonFitIndex(j)) = k{i-1}.Yest(findIndexFromCell(k{i-1}.timeSim,datetime(k{i}.startDate)),nonFitIndex(j));
     end
     
     % Fitting of the model to real data
@@ -172,9 +173,11 @@ else
         k{lockdown.index}.y0(find(strcmp(model.allStateName, model.fitStateName{i}))) = k{rfi}.(model.fitStateName{i})(findIndexFromCell(k{rfi}.timeFit,datetime(k{lockdown.index}.startDate)));
     end
 end
-notS = sum(k{lockdown.index}.y0); % jumlah selain yang susceptible
-k{lockdown.index}.y0(find(strcmp(model.allStateName, 'S'))) = Npop - notS;
-k{lockdown.index}.paramEst = k{rfi}.paramEst; % set parameter sama seperti kebijakan sebelumnya,
+% use initial fitting data from previous segment simulation
+for j=1:numel(nonFitIndex)
+    k{lockdown.index}.y0(nonFitIndex(j)) = k{lockdown.index-1}.Yest(findIndexFromCell(k{lockdown.index-1}.timeSim,datetime(k{lockdown.index}.startDate)),nonFitIndex(j));
+end
+k{lockdown.index}.paramEst = k{rfi}.paramEst; % set parameter sama seperti kebijakan sebelumnya
 k{lockdown.index}.paramEst(find(strcmp(model.paramName, 'r_S_P'))) = 0; % namun nilai beta di-set nol
 k{lockdown.index}.paramEst(find(strcmp(model.paramName, 'r_S_NI'))) = 0; % namun nilai beta di-set nol
 k{lockdown.index} = simulateModel(k{lockdown.index},k{lockdown.index}.paramEst,model);
