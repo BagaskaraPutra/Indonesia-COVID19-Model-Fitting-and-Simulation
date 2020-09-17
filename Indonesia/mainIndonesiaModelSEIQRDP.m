@@ -127,10 +127,14 @@ guess = [alpha_guess,...
     1/QT_guess,...
     lambda_guess,...
     kappa_guess];
-for i=1:numel(k)
-    k{i}.guessParam = guess;
-    %0.5.*(k{i}.lbParam+k{i}.ubParam); % if first time running, use this.
-end
+% for i=1:numel(k)
+%     k{i}.guessParam = guess;
+%     %0.5.*(k{i}.lbParam+k{i}.ubParam); % if first time running, use this.
+% end
+
+% Load initial guess from previously fitted param %[EDITABLE]
+paramDir = 'results/SEIQRDP/Matlab_MulaiFiting2020-04-30AkhirFitting2020-09-15Lockdown2020-09-14Durasi14/param';
+k = loadParam(k,paramDir,model);
 
 % If you want to manually set parameter:
 % k{1}.guessParam(find(strcmp(model.paramName, 'beta'))) = 0.5; OR k{1}.guessParam(1) = 0.5;
