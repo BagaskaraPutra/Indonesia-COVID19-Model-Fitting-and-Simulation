@@ -36,6 +36,8 @@ k{2}.name = 'PSBB Masa Transisi Kurva Meningkat';
 k{2}.startDate = '2020-07-07'; %k{2}.endDate = '2020-08-27'; k{2}.numDays = 14;
 % k{3}.name = 'Long Weekend 28 Agustus 2020'; 
 % k{3}.startDate = '2020-08-28';
+% k{3}.name = 'PSBB Total 14 September 2020';
+% k{3}.startDate = '2020-09-14';
 rfi = numel(k); % real fitting index: indeks kebijakan terakhir yang merupakan data fitting nyata
 
 lockdown.index = rfi+1;
@@ -49,11 +51,12 @@ lockdown.numDays = 14; % durasi simulasi lockdown total
 postlockdown.numDays = 730; %420; % durasi simulasi pasca lockdown
 k{lockdown.index}.name = 'Simulasi Lockdown Total';
 k{lockdown.index}.startDate = lockdown.startDate; 
-% k{lockdown.index}.endDate = lockdown.startDate; 
+k{lockdown.index}.endDate = lockdown.startDate; 
 k{lockdown.index}.numDays = lockdown.numDays;
 
 k{lockdown.index+1}.name = 'Simulasi Pelonggaran Lockdown Total';
 k{lockdown.index+1}.startDate = datestr(datenum(datetime(k{lockdown.index}.startDate)) + datenum(0,0,k{lockdown.index}.numDays)); %[Edited for Octave]
+k{lockdown.index+1}.endDate = k{lockdown.index+1}.startDate;
 k{lockdown.index+1}.numDays = postlockdown.numDays;
 
 % Inisialisasi semua state berdasarkan model.allStateName baik ada data fitting maupun tidak
@@ -88,7 +91,7 @@ k{rfi}.numDays = datenum(k{lockdown.index}.timeFit{1}-k{rfi}.timeFit{end})+lockd
 % supaya tanggal akhir simulasi tanpa lockdown = dengan lockdown
 
 % [EDITABLE] keterangan simulasi berdasarkan konfigurasi fitting & simulasi lockdown
-keteranganSimulasi = ['MulaiFiting' datestr(k{1}.timeFit{end},'yyyy-mm-dd') ...
+keteranganSimulasi = ['MulaiFiting' datestr(k{1}.timeFit{1},'yyyy-mm-dd') ...
             'AkhirFitting' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd') ...
           'Lockdown' lockdown.startDate 'Durasi' num2str(lockdown.numDays)];
 

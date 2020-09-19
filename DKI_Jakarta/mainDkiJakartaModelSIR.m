@@ -44,9 +44,9 @@ k{3}.startDate = '2020-04-10'; k{3}.endDate = '2020-06-04'; k{3}.numDays = 14;
 k{4}.name = 'PSBB Masa Transisi Kurva Menurun'; 
 k{4}.startDate = '2020-06-05'; k{4}.endDate = '2020-07-06'; k{4}.numDays = 14;
 k{5}.name = 'PSBB Masa Transisi Kurva Meningkat'; 
-k{5}.startDate = '2020-07-07'; k{5}.endDate = '2020-08-27'; k{5}.numDays = 14;
-k{6}.name = 'Long Weekend 28 Agustus 2020'; 
-k{6}.startDate = '2020-08-28';
+k{5}.startDate = '2020-07-07'; k{5}.endDate = '2020-09-14'; %k{5}.endDate = '2020-08-27'; k{5}.numDays = 14;
+% k{6}.name = 'Long Weekend 28 Agustus 2020'; 
+% k{6}.startDate = '2020-08-28';
 rfi = numel(k); % real fitting index: indeks kebijakan terakhir yang merupakan data fitting nyata
 
 lockdown.index = rfi+1;
@@ -60,11 +60,12 @@ lockdown.numDays = 14; % durasi simulasi lockdown total
 postlockdown.numDays = 420; % durasi simulasi pasca lockdown
 k{lockdown.index}.name = 'Simulasi Lockdown Total';
 k{lockdown.index}.startDate = lockdown.startDate; 
-% k{lockdown.index}.endDate = lockdown.startDate; 
+k{lockdown.index}.endDate = lockdown.startDate; 
 k{lockdown.index}.numDays = lockdown.numDays;
 
 k{lockdown.index+1}.name = 'Simulasi Pelonggaran Lockdown Total';
 k{lockdown.index+1}.startDate = datestr(datenum(datetime(k{lockdown.index}.startDate)) + datenum(0,0,k{lockdown.index}.numDays)); %[Edited for Octave]
+k{lockdown.index+1}.endDate = k{lockdown.index+1}.startDate;
 k{lockdown.index+1}.numDays = postlockdown.numDays;
 
 % Inisialisasi semua state berdasarkan model.allStateName baik ada data fitting maupun tidak
@@ -99,7 +100,7 @@ k{rfi}.numDays = datenum(k{lockdown.index}.timeFit{1}-k{rfi}.timeFit{end})+lockd
 % supaya tanggal akhir simulasi tanpa lockdown = dengan lockdown
 
 % [EDITABLE] keterangan simulasi berdasarkan konfigurasi fitting & simulasi lockdown
-keteranganSimulasi = ['LongWeekend28Agustus' ...
+keteranganSimulasi = ['MulaiFiting' datestr(k{1}.timeFit{1},'yyyy-mm-dd') ... %'LongWeekend28Agustus' ...
             'AkhirFitting' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd') ...
           'Lockdown' lockdown.startDate 'Durasi' num2str(lockdown.numDays)];
 
@@ -240,7 +241,7 @@ k{4}.vlColor = 'b';
 k{5}.vlColor = orangeDef;
 k{6}.vlColor = 'k';
 k{7}.vlColor = brownDef;
-k{8}.vlColor = 'm';
+% k{8}.vlColor = 'm';
 
 % [EDITABLE] Index untuk meletakkan cursor secara otomatis pada nilai maksimum figure
 cursorIndexMax{1}.kebijakan = rfi; % indeks kebijakan tanpa lockdown yang akan diberi cursor
