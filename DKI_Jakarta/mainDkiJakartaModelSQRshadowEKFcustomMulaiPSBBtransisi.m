@@ -2,7 +2,7 @@
 % Semua yang ada komentar [EDITABLE] dapat diprioritaskan untuk diedit jika
 % ada perubahan model, parameter model, parameter plotting, kebijakan, dll.
 
-%By: Bagaskara P.P., Last Modified: 2020-09-17
+%By: Bagaskara P.P., Last Modified: 2020-09-27
 
 clear all; close all; clc; 
 mainDir = pwd; % get current main directory 
@@ -104,7 +104,7 @@ k{rfi}.numDays = datenum(k{lockdown.index}.timeFit{1}-k{rfi}.timeFit{end})+lockd
 % supaya tanggal akhir simulasi tanpa lockdown = dengan lockdown
 
 % [EDITABLE] keterangan simulasi berdasarkan konfigurasi fitting & simulasi lockdown
-keteranganSimulasi = ['EKF_'... %'RandomQs'
+keteranganSimulasi = ['EKFcustom_'... %'RandomQs'
             'MulaiFiting' datestr(k{1}.timeFit{1},'yyyy-mm-dd') 'LongWeekend28Agustus' ...
             'AkhirFitting' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd') ...
           'Lockdown' lockdown.startDate 'Durasi' num2str(lockdown.numDays)];
@@ -327,25 +327,39 @@ for i=1:numel(customStates)
 end
 title(['Fitting & Simulasi State ' stringCustom ' dengan model ' model.name ' untuk ' namaDaerah ' per Kebijakan']);
 
-%% EKF
+%% Extended Kalman Filter (EKF)
+customStatesEKF = {'Q','D','Q_s','D_s'}; % [EDITABLE] Ubah nama state sesuai yang ingin di-plot. Pisahkan dengan koma ','.
+stringCustomEKF = [];
+for i=1:numel(customStatesEKF)
+    stringCustomEKF = [stringCustomEKF ' ' customStatesEKF{i}];
+end
+
 QF = eye(numel(model.allStateName));
 RF = eye(numel(model.fitStateName));
-k{rfi} = EKF(k{rfi},k{rfi}.paramEst,QF,RF,model); 
+k{rfi} = EKFcustom(k{rfi},k{rfi}.paramEst,QF,RF,model); 
 hFigCustomStatesEKF = figure('units','normalized','outerposition',[0 0 1 1]);
-k{rfi} = plotCustomStatesEKF(k{rfi},customStates,model, hFigCustomStatesEKF,cursorIndexMax); 
+k{rfi} = plotCustomStatesEKF(k{rfi},customStatesEKF,model, hFigCustomStatesEKF,cursorIndexMax);
+k = plotVerticalLines(k);
+plotLegend(k);
+title(['Fitting & Simulasi State ' stringCustomEKF ' dengan model ' model.name '+EKF untuk ' namaDaerah ' per Kebijakan']);
 
 QF = eye(numel(model.allStateName));
 RF = 1e6*eye(numel(model.fitStateName));
-k{rfi} = EKF(k{rfi},k{rfi}.paramEst,QF,RF,model); 
+k{rfi} = EKFcustom(k{rfi},k{rfi}.paramEst,QF,RF,model); 
 hFigCustomStatesEKF1 = figure('units','normalized','outerposition',[0 0 1 1]);
-k{rfi} = plotCustomStatesEKF(k{rfi},customStates,model, hFigCustomStatesEKF1,cursorIndexMax); 
+k{rfi} = plotCustomStatesEKF(k{rfi},customStatesEKF,model, hFigCustomStatesEKF1,cursorIndexMax); 
+k = plotVerticalLines(k);
+plotLegend(k);
+title(['Fitting & Simulasi State ' stringCustomEKF ' dengan model ' model.name '+EKF untuk ' namaDaerah ' per Kebijakan']);
 
 QF = 1e6*eye(numel(model.allStateName));
 RF = eye(numel(model.fitStateName));
-k{rfi} = EKF(k{rfi},k{rfi}.paramEst,QF,RF,model); 
+k{rfi} = EKFcustom(k{rfi},k{rfi}.paramEst,QF,RF,model); 
 hFigCustomStatesEKF2 = figure('units','normalized','outerposition',[0 0 1 1]);
-k{rfi} = plotCustomStatesEKF(k{rfi},customStates,model, hFigCustomStatesEKF2,cursorIndexMax); 
-
+k{rfi} = plotCustomStatesEKF(k{rfi},customStatesEKF,model, hFigCustomStatesEKF2,cursorIndexMax); 
+k = plotVerticalLines(k);
+plotLegend(k);
+title(['Fitting & Simulasi State ' stringCustomEKF ' dengan model ' model.name '+EKF untuk ' namaDaerah ' per Kebijakan']);
 
 %% Save results
 % save peak info
@@ -384,6 +398,13 @@ saveas(hFigFittingStates,[saveDir '/FittingStates.fig']);
 saveas(hFigFittingStates,[saveDir '/FittingStates.png']);
 saveas(hFigCustomStates,[saveDir '/CustomStates.fig']);
 saveas(hFigCustomStates,[saveDir '/CustomStates.png']);
+saveas(hFigCustomStatesEKF,[saveDir '/EKFQRidentity.fig']);
+saveas(hFigCustomStatesEKF,[saveDir '/EKFQRidentity.png']);
+saveas(hFigCustomStatesEKF1,[saveDir '/EKFQidentityRhigh.fig']);
+saveas(hFigCustomStatesEKF1,[saveDir '/EKFQidentityRhigh.png']);
+saveas(hFigCustomStatesEKF2,[saveDir '/EKFQhighRidentity.fig']);
+saveas(hFigCustomStatesEKF2,[saveDir '/EKFQhighRidentity.png']);
+
 fprintf(['Grafik berhasil disimpan di:']); saveDir
 else
     fprintf(['Grafik TIDAK disimpan.\n Jika masih ingin menyimpan, simpan secara manual atau jalankan ulang script [F5].\n']);

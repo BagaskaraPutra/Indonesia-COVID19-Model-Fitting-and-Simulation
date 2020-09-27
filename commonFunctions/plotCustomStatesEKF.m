@@ -66,12 +66,12 @@ function k = plotCustomStatesEKF(k,stateNamePlot,model, hFig,cursorMaxIndex)
             for j=1:numel(kebijakan.timeSim)
               matlabTimeSim(j) = datetime(kebijakan.timeSim{j});
             end
-            estPlot = plot(matlabTimeSim,kebijakan.xVarPredic(:,plotCustEstIndex)); 
+            estPlot = plot(matlabTimeSim,kebijakan.xhatPredict(:,plotCustEstIndex)); 
         else
             for j=1:numel(kebijakan.timeSim)
               epochTimeSim(j) = datenum(kebijakan.timeSim{j});
             end
-            estPlot = plot(epochTimeSim,kebijakan.xVarPredic(:,plotCustEstIndex)); 
+            estPlot = plot(epochTimeSim,kebijakan.xhatPredict(:,plotCustEstIndex)); 
             datetick('x','dd-mm-yyyy');    
         end
         
@@ -81,8 +81,8 @@ function k = plotCustomStatesEKF(k,stateNamePlot,model, hFig,cursorMaxIndex)
         kebijakan.varName = [fitLegend estLegend];
         
         if(cursorKebijakan.bool)
-            kebijakan.peak.y = max(kebijakan.xVarPredic(:,find(strcmp(model.allStateName,cursorKebijakan.name))));
-            kebijakan.peak.x = find(kebijakan.xVarPredic(:,find(strcmp(model.allStateName,cursorKebijakan.name)))==kebijakan.peak.y);
+            kebijakan.peak.y = max(kebijakan.xhatPredict(:,find(strcmp(model.allStateName,cursorKebijakan.name))));
+            kebijakan.peak.x = find(kebijakan.xhatPredict(:,find(strcmp(model.allStateName,cursorKebijakan.name)))==kebijakan.peak.y);
             hLine = estPlot(find(strcmp(stateNamePlot,cursorKebijakan.name)));
             if(softwareName == 'matlab')
                 cursorKebijakan.dTip = createDatatip(dcmObj,hLine);
