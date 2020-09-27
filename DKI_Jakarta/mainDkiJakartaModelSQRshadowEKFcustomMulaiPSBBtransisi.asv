@@ -118,7 +118,7 @@ end
 
 %% [EDITABLE] Upper bound of parameter for estimation constraint
 for i=1:numel(k) 
-    k{i}.ubParam = 1*ones(1,size(model.paramName,2));
+    k{i}.ubParam = 10*ones(1,size(model.paramName,2));
 end
 % If you want to manually set parameter: 
 % k{1}.ubParam(find(strcmp(model.paramName, 'beta'))) = 1; OR k{1}.ubParam(1) = 1;
@@ -152,7 +152,7 @@ for j=1:numel(model.fitStateName)
 end
 %Jika data fitting tidak tersedia, set manual:
 % jumlah selain yang suceptible (hanya berlaku untuk model ini), jika model lain ubah manual
-k{1}.y0(find(strcmp(model.allStateName, 'Q_s'))) = k{1}.y0(find(strcmp(model.allStateName, 'Q'))); %...
+k{1}.y0(find(strcmp(model.allStateName, 'Q_s'))) = k{1}.y0(find(strcmp(model.allStateName, 'Q'))) ...
 %                                                    + k{1}.y0(find(strcmp(model.allStateName, 'R'))) ...
 %                                                    + k{1}.y0(find(strcmp(model.allStateName, 'D')));
 k{1}.y0(find(strcmp(model.allStateName, 'R_s'))) = k{1}.y0(find(strcmp(model.allStateName, 'R')));
@@ -360,16 +360,6 @@ k{rfi} = plotCustomStatesEKF(k{rfi},customStatesEKF,model, hFigCustomStatesEKF2,
 k = plotVerticalLines(k);
 plotLegend(k);
 title(['Fitting & Simulasi State ' stringCustomEKF ' dengan model ' model.name '+EKF untuk ' namaDaerah ' per Kebijakan']);
-
-customStatesEKF = {'S','Q','R','D','Q_s','R_s','D_s'};
-QF = eye(numel(model.allStateName));
-RF = eye(numel(model.fitStateName));
-k{rfi} = EKFcustom(k{rfi},k{rfi}.paramEst,QF,RF,model); 
-hFigCustomStatesEKF = figure('units','normalized','outerposition',[0 0 1 1]);
-k{rfi} = plotCustomStatesEKF(k{rfi},customStatesEKF,model, hFigCustomStatesEKF,cursorIndexMax);
-k = plotVerticalLines(k);
-plotLegend(k);
-title(['Fitting & Simulasi Semua State dengan model ' model.name '+EKF untuk ' namaDaerah ' per Kebijakan']);
 
 %% Save results
 % save peak info
