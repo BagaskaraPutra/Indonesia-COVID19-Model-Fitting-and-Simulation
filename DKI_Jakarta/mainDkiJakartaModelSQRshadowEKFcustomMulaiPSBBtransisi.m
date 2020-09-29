@@ -104,9 +104,9 @@ k{rfi}.numDays = datenum(k{lockdown.index}.timeFit{1}-k{rfi}.timeFit{end})+lockd
 % supaya tanggal akhir simulasi tanpa lockdown = dengan lockdown
 
 % [EDITABLE] keterangan simulasi berdasarkan konfigurasi fitting & simulasi lockdown
-keteranganSimulasi = ['EKFcustomQ=Qs_'... %'RandomQs'
-            'MulaiFiting' datestr(k{1}.timeFit{1},'yyyy-mm-dd') 'LongWeekend28Agustus' ...
-            'AkhirFitting' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd') ...
+keteranganSimulasi = ['EKFcustomQ=Qs_'...
+            'MulaiFit' datestr(k{1}.timeFit{1},'yyyy-mm-dd') ...
+            'AkhirFit' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd') ...
           'Lockdown' lockdown.startDate 'Durasi' num2str(lockdown.numDays)];
 
 %% [EDITABLE] Lower bound of parameter for estimation constraint
@@ -263,9 +263,9 @@ k{3}.vlColor = yellowDef;
 
 % [EDITABLE] Index untuk meletakkan cursor secara otomatis pada nilai maksimum figure
 cursorIndexMax{1}.kebijakan = rfi; % indeks kebijakan tanpa lockdown yang akan diberi cursor
-cursorIndexMax{1}.stateName = 'Q'; % nama state yang akan diberi cursor
+cursorIndexMax{1}.stateName = {'Q','Q_s'}; % nama state yang akan diberi cursor
 cursorIndexMax{2}.kebijakan = lockdown.index+1; % indeks kebijakan pasca-lockdown yang akan diberi cursor
-cursorIndexMax{2}.stateName = 'Q'; % nama state yang akan diberi cursor
+cursorIndexMax{2}.stateName = {'Q','Q_s'}; % nama state yang akan diberi cursor
 
 % garis batas kapasitas RS 
 if(exist('kapasitasRS'))
@@ -308,26 +308,31 @@ end
 printLockdownDetails(lockdown);
 title(['Fitting & Simulasi State Fitting Saja dengan Model ' model.name ' untuk ' namaDaerah ' per Kebijakan']);
 
-% custom states
-customStates = {'Q','D','Q_s','D_s'}; % [EDITABLE] Ubah nama state sesuai yang ingin di-plot. Pisahkan dengan koma ','.
-hFigCustomStates = figure('units','normalized','outerposition',[0 0 1 1]);
-k = plotCustomStates(k,customStates,model, hFigCustomStates,cursorIndexMax); 
-k = plotVerticalLines(k);
-if(exist('kapasitasRS'))
-    kapRS.plot = line(kapRS.x,kapRS.y);
-    set(kapRS.plot,kapRS.nameArray,kapRS.lineProp);
-    plotLegend(k,kapRS.plot,kapRS.title);
-else
-    plotLegend(k);
-end
-printLockdownDetails(lockdown);
-stringCustom = [];
-for i=1:numel(customStates)
-    stringCustom = [stringCustom ' ' customStates{i}];
-end
-title(['Fitting & Simulasi State ' stringCustom ' dengan model ' model.name ' untuk ' namaDaerah ' per Kebijakan']);
+% % custom states
+% customStates = {'Q','D','Q_s','D_s'}; % [EDITABLE] Ubah nama state sesuai yang ingin di-plot. Pisahkan dengan koma ','.
+% hFigCustomStates = figure('units','normalized','outerposition',[0 0 1 1]);
+% k = plotCustomStates(k,customStates,model, hFigCustomStates,cursorIndexMax); 
+% k = plotVerticalLines(k);
+% if(exist('kapasitasRS'))
+%     kapRS.plot = line(kapRS.x,kapRS.y);
+%     set(kapRS.plot,kapRS.nameArray,kapRS.lineProp);
+%     plotLegend(k,kapRS.plot,kapRS.title);
+% else
+%     plotLegend(k);
+% end
+% printLockdownDetails(lockdown);
+% stringCustom = [];
+% for i=1:numel(customStates)
+%     stringCustom = [stringCustom ' ' customStates{i}];
+% end
+% title(['Fitting & Simulasi State ' stringCustom ' dengan model ' model.name ' untuk ' namaDaerah ' per Kebijakan']);
 
 %% Extended Kalman Filter (EKF)
+cursorIndexMax{1}.kebijakan = rfi; % indeks kebijakan tanpa lockdown yang akan diberi cursor
+cursorIndexMax{1}.stateName = {'Q','Q_s'}; % nama state yang akan diberi cursor
+cursorIndexMax{2}.kebijakan = lockdown.index+1; % indeks kebijakan pasca-lockdown yang akan diberi cursor
+cursorIndexMax{2}.stateName = {'Q','Q_s'}; % nama state yang akan diberi cursor
+
 customStatesEKF = {'Q','D','Q_s','D_s'}; % [EDITABLE] Ubah nama state sesuai yang ingin di-plot. Pisahkan dengan koma ','.
 stringCustomEKF = [];
 for i=1:numel(customStatesEKF)

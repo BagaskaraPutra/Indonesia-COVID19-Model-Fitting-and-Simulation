@@ -77,6 +77,7 @@ function k = plotCustomStates(k,stateNamePlot,model, hFig,cursorMaxIndex)
         kebijakan.varName = [fitLegend estLegend];
         
         if(cursorKebijakan.bool)
+            kebijakan.peak{cIdx}.name = cursorKebijakan.name{cIdx};
             kebijakan.peak.y = max(kebijakan.Yest(:,find(strcmp(model.allStateName,cursorKebijakan.name))));
             kebijakan.peak.x = find(kebijakan.Yest(:,find(strcmp(model.allStateName,cursorKebijakan.name)))==kebijakan.peak.y);
             hLine = estPlot(find(strcmp(stateNamePlot,cursorKebijakan.name)));

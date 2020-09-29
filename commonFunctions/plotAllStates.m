@@ -71,13 +71,26 @@ function k = plotAllStates(k,model, hFig,cursorMaxIndex)
         end
         kebijakan.varName = [fittingLegend estLegend];
         
+%         if(cursorKebijakan.bool)
+%             kebijakan.peak.y = max(kebijakan.Yest(:,find(strcmp(model.allStateName,cursorKebijakan.name))));
+%             kebijakan.peak.x = find(kebijakan.Yest(:,find(strcmp(model.allStateName,cursorKebijakan.name)))==kebijakan.peak.y);
+%             hLine = estPlot(find(strcmp(model.allStateName,cursorKebijakan.name)));
+%             if(softwareName == 'matlab')
+%                 cursorKebijakan.dTip = createDatatip(dcmObj,hLine);
+%                 cursorKebijakan.dTip.Position = [kebijakan.peak.x kebijakan.peak.y 0];
+%             end
+%         end
         if(cursorKebijakan.bool)
-            kebijakan.peak.y = max(kebijakan.Yest(:,find(strcmp(model.allStateName,cursorKebijakan.name))));
-            kebijakan.peak.x = find(kebijakan.Yest(:,find(strcmp(model.allStateName,cursorKebijakan.name)))==kebijakan.peak.y);
-            hLine = estPlot(find(strcmp(model.allStateName,cursorKebijakan.name)));
-            if(softwareName == 'matlab')
-                cursorKebijakan.dTip = createDatatip(dcmObj,hLine);
-                cursorKebijakan.dTip.Position = [kebijakan.peak.x kebijakan.peak.y 0];
+            kebijakan.peak = {};
+            for cIdx=1:numel(cursorKebijakan.name)
+                kebijakan.peak{cIdx}.name = cursorKebijakan.name{cIdx};
+                kebijakan.peak{cIdx}.y = max(kebijakan.Yest(:,find(strcmp(model.allStateName,cursorKebijakan.name{cIdx}))));
+                kebijakan.peak{cIdx}.x = find(kebijakan.Yest(:,find(strcmp(model.allStateName,cursorKebijakan.name{cIdx})))==kebijakan.peak{cIdx}.y);
+                hLine = estPlot(find(strcmp(model.allStateName,cursorKebijakan.name{cIdx})));
+                if(softwareName == 'matlab')
+                    cursorKebijakan.dTip{cIdx} = createDatatip(dcmObj,hLine);
+                    cursorKebijakan.dTip{cIdx}.Position = [kebijakan.peak{cIdx}.x kebijakan.peak{cIdx}.y 0];
+                end
             end
         end
     end

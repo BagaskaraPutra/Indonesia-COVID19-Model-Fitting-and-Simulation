@@ -37,9 +37,6 @@ function k = plotCustomStatesEKF(k,stateNamePlot,model, hFig,cursorMaxIndex)
         fitStates = [];
         for i=1:numel(plotCustEstIndex)
             estLegend{i} = [model.allStateName{plotCustEstIndex(i)} ' (estimated)'];
-%             if(find(strcmp(model.fitStateName,model.allStateName{plotCustEstIndex(i)})))
-%                 
-%             end
         end
         for i=1:numel(plotCustFitIndex)
             fitLegend{i} = [model.allStateName{plotCustFitIndex(i)} ' (fitting)'];
@@ -81,12 +78,16 @@ function k = plotCustomStatesEKF(k,stateNamePlot,model, hFig,cursorMaxIndex)
         kebijakan.varName = [fitLegend estLegend];
         
         if(cursorKebijakan.bool)
-            kebijakan.peak.y = max(kebijakan.xhatPredict(:,find(strcmp(model.allStateName,cursorKebijakan.name))));
-            kebijakan.peak.x = find(kebijakan.xhatPredict(:,find(strcmp(model.allStateName,cursorKebijakan.name)))==kebijakan.peak.y);
-            hLine = estPlot(find(strcmp(stateNamePlot,cursorKebijakan.name)));
-            if(softwareName == 'matlab')
-                cursorKebijakan.dTip = createDatatip(dcmObj,hLine);
-                cursorKebijakan.dTip.Position = [kebijakan.peak.x kebijakan.peak.y 0];
+            kebijakan.peak = {};
+            for cIdx=1:numel(cursorKebijakan.name)
+                kebijakan.peak{cIdx}.name = cursorKebijakan.name{cIdx};
+                kebijakan.peak{cIdx}.y = max(kebijakan.xhatPredict(:,find(strcmp(model.allStateName,cursorKebijakan.name{cIdx}))));
+                kebijakan.peak{cIdx}.x = find(kebijakan.xhatPredict(:,find(strcmp(model.allStateName,cursorKebijakan.name{cIdx})))==kebijakan.peak{cIdx}.y);
+                hLine = estPlot(find(strcmp(stateNamePlot,cursorKebijakan.name{cIdx})));
+                if(softwareName == 'matlab')
+                    cursorKebijakan.dTip{cIdx} = createDatatip(dcmObj,hLine);
+                    cursorKebijakan.dTip{cIdx}.Position = [kebijakan.peak{cIdx}.x kebijakan.peak{cIdx}.y 0];
+                end
             end
         end
     end
