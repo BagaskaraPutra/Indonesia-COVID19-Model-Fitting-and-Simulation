@@ -16,7 +16,13 @@ function k = plotCustomStatesEKF(k,stateNamePlot,model, hFig,cursorMaxIndex)
             end
         end
     end
-    for ik=1:numel(k)
+    kContainsXhat = [];
+    for xhpIdx = 1:numel(k)
+        if(isfield(k{xhpIdx},'xhatPredict'))
+            kContainsXhat = [kContainsXhat xhpIdx];
+        end
+    end
+    for ik=1:max(kContainsXhat)
         cursor{ik}.bool = false;
         for jk=1:numel(cursorMaxIndex)
             if(ik == cursorMaxIndex{jk}.kebijakan)
@@ -24,11 +30,11 @@ function k = plotCustomStatesEKF(k,stateNamePlot,model, hFig,cursorMaxIndex)
                 cursor{ik}.name = cursorMaxIndex{jk}.stateName;
             end
         end
-        if(iscell(k))
+%         if(iscell(k))
             k{ik} = plotCustomStatesPerKebijakan(k{ik},stateNamePlot,model,cursor{ik});
-        else
-            k = plotCustomStatesPerKebijakan(k,stateNamePlot,model,cursor{ik});
-        end
+%         else
+%             k = plotCustomStatesPerKebijakan(k,stateNamePlot,model,cursor{ik});
+%         end
     end
     
     function kebijakan = plotCustomStatesPerKebijakan(kebijakan,stateNamePlot,model,cursorKebijakan)

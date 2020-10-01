@@ -1,14 +1,8 @@
-%% SIR(modified) DKI Jakarta per Kebijakan:
+%% SQRshadow+EKF DKI Jakarta per Kebijakan:
 % Semua yang ada komentar [EDITABLE] dapat diprioritaskan untuk diedit jika
 % ada perubahan model, parameter model, parameter plotting, kebijakan, dll.
-% Compartments: 
-% S: Susceptible
-% I: Infective
-% r: Recovered (Sembuh)
-% D: Dead (Meninggal)
 
-%By: Bobby R.D., Last Modified: 2020-07-21
-%By: Bagaskara P.P., Last Modified: 2020-09-06
+%By: Bagaskara P.P., Last Modified: 2020-09-27
 
 clear all; close all; clc; 
 mainDir = pwd; % get current main directory 
@@ -26,8 +20,8 @@ end
 
 % [EDITABLE] Jika ingin mengubah model, state fiting, dan parameter; edit variable2 di bawah ini:
 namaDaerah = 'DKI Jakarta';
-model.name = 'SIR(modified)';
-model.dir = ['../modelSIR(modified)'];
+model.name = 'SQRshadow';
+model.dir = ['../modelSQRshadow'];
 model = loadModel(model);
 global Npop; Npop = 10770487; % DKI Jakarta total population
 % kapasitasRS = 12150; % dari kapasitas RS 70% pada 28 Agustus 2020
@@ -35,18 +29,8 @@ global Npop; Npop = 10770487; % DKI Jakarta total population
 % [EDITABLE] Kebijakan: disimpan dalam cell struct k{i}, di mana i adalah urutan kebijakan
 % ubah startDate & endDate sesuai kebijakan. Jika tidak tahu endDate, tidak usah diisi, data terakhir yang diambil.
 % numDays = berapa hari akan disimulasikan setelah hari terakhir kebijakan?
-k{1}.name = 'Tanpa Kebijakan'; 
-k{1}.startDate = '2020-03-01'; k{1}.endDate = '2020-03-18'; k{1}.numDays = 14;
-k{2}.name = 'Larangan Kerumunan Maklumat POLRI'; 
-k{2}.startDate = '2020-03-19'; k{2}.endDate = '2020-04-09'; k{2}.numDays = 14;
-k{3}.name = 'PSBB Permenkesri No. 9 Tahun 2020'; 
-k{3}.startDate = '2020-04-10'; k{3}.endDate = '2020-06-04'; k{3}.numDays = 14;
-k{4}.name = 'PSBB Masa Transisi Kurva Menurun'; 
-k{4}.startDate = '2020-06-05'; k{4}.endDate = '2020-07-06'; k{4}.numDays = 14;
-k{5}.name = 'PSBB Masa Transisi Kurva Meningkat'; 
-k{5}.startDate = '2020-07-07'; k{5}.endDate = '2020-09-14'; %k{5}.endDate = '2020-08-27'; k{5}.numDays = 14;
-% k{6}.name = 'Long Weekend 28 Agustus 2020'; 
-% k{6}.startDate = '2020-08-28';
+k{1}.name = 'PSBB Masa Transisi'; 
+k{1}.startDate = '2020-06-05'; k{1}.endDate = '2020-09-13'; k{1}.numDays = 14;
 rfi = numel(k); % real fitting index: indeks kebijakan terakhir yang merupakan data fitting nyata
 
 lockdown.index = rfi+1;
@@ -57,7 +41,7 @@ lockdown.startDate = '2020-09-14';
 % lockdown.startDate = '2021-02-08'; 
 % lockdown.startDate = '2021-03-14'; 
 lockdown.numDays = 14; % durasi simulasi lockdown total
-postlockdown.numDays = 420; % durasi simulasi pasca lockdown
+postlockdown.numDays = 730; %420; % durasi simulasi pasca lockdown
 k{lockdown.index}.name = 'Simulasi Lockdown Total';
 k{lockdown.index}.startDate = lockdown.startDate; 
 k{lockdown.index}.endDate = lockdown.startDate; 
@@ -78,12 +62,20 @@ end
 
 % Ambil data dari xls atau csv
 if(softwareName == 'matlab')
-    lama = getDataIstilahLamaModelSIR('COVID19_DkiJakarta_IstilahLama.xls'); %[EDITABLE Matlab]
-    baru = getDataIstilahBaruModelSIR('COVID19_DkiJakarta_IstilahBaru.xls'); %[EDITABLE Matlab]
+    lama = getDataIstilahLamaModelSQRshadow('COVID19_DkiJakarta_IstilahLama.xls'); %[EDITABLE Matlab]
+    baru = getDataIstilahBaruModelSQRshadow('COVID19_DkiJakarta_IstilahBaru.xls'); %[EDITABLE Matlab]
 else
-    lama = getDataIstilahLamaModelSIR('COVID19_DkiJakarta_IstilahLama.csv'); %[EDITABLE Octave]
-    baru = getDataIstilahBaruModelSIR('COVID19_DkiJakarta_IstilahBaru.csv'); %[EDITABLE Octave]
+    lama = getDataIstilahLamaModelSQRshadow('COVID19_DkiJakarta_IstilahLama.csv'); %[EDITABLE Octave]
+    baru = getDataIstilahBaruModelSQRshadow('COVID19_DkiJakarta_IstilahBaru.csv'); %[EDITABLE Octave]
 end
+
+% % Beri keacakan pada data fitting shadow Q_s
+% for i=1:numel(lama.Q)
+%     lama.Q_s(i) = (2+abs(normrnd(0,0.1))).*lama.Q(i);
+% end
+% for i=1:numel(baru.Q)
+%     baru.Q_s(i) = (2+abs(normrnd(0,0.1))).*baru.Q(i);
+% end
 
 % Gabung data istilah lama (sampai dengan 16 Juli) & istilah baru (setelah 16 Juli)
 for i=1:numel(model.fitStateName)
@@ -100,8 +92,9 @@ k{rfi}.numDays = datenum(k{lockdown.index}.timeFit{1}-k{rfi}.timeFit{end})+lockd
 % supaya tanggal akhir simulasi tanpa lockdown = dengan lockdown
 
 % [EDITABLE] keterangan simulasi berdasarkan konfigurasi fitting & simulasi lockdown
-keteranganSimulasi = ['MulaiFiting' datestr(k{1}.timeFit{1},'yyyy-mm-dd') ... %'LongWeekend28Agustus' ...
-            'AkhirFitting' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd') ...
+keteranganSimulasi = ['EKFcustomQ=Qs_'...
+            'MulaiFit' datestr(k{1}.timeFit{1},'yyyy-mm-dd') ...
+            'AkhirFit' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd') ...
           'Lockdown' lockdown.startDate 'Durasi' num2str(lockdown.numDays)];
 
 %% [EDITABLE] Lower bound of parameter for estimation constraint
@@ -147,6 +140,11 @@ for j=1:numel(model.fitStateName)
 end
 %Jika data fitting tidak tersedia, set manual:
 % jumlah selain yang suceptible (hanya berlaku untuk model ini), jika model lain ubah manual
+k{1}.y0(find(strcmp(model.allStateName, 'Q_s'))) = k{1}.y0(find(strcmp(model.allStateName, 'Q'))); %...
+%                                                    + k{1}.y0(find(strcmp(model.allStateName, 'R'))) ...
+%                                                    + k{1}.y0(find(strcmp(model.allStateName, 'D')));
+k{1}.y0(find(strcmp(model.allStateName, 'R_s'))) = k{1}.y0(find(strcmp(model.allStateName, 'R')));
+k{1}.y0(find(strcmp(model.allStateName, 'D_s'))) = k{1}.y0(find(strcmp(model.allStateName, 'D')));
 notS = sum(k{1}.y0); 
 k{1}.y0(find(strcmp(model.allStateName, 'S'))) =  Npop - notS;
 
@@ -199,6 +197,7 @@ for j=1:numel(nonFitIndex)
 end
 k{lockdown.index}.paramEst = k{rfi}.paramEst; % set parameter sama seperti kebijakan sebelumnya,
 k{lockdown.index}.paramEst(find(strcmp(model.paramName, 'beta'))) = 0; % namun nilai beta di-set nol
+k{lockdown.index}.paramEst(find(strcmp(model.paramName, 'beta_s'))) = 0; % namun nilai beta di-set nol
 k{lockdown.index} = simulateModel(k{lockdown.index},k{lockdown.index}.paramEst,model);
 
 % [EDITABLE] Simulasi Kebijakan Pelonggaran Lockdown Total
@@ -210,6 +209,7 @@ k{lockdown.index+1} = simulateModel(k{lockdown.index+1},k{lockdown.index+1}.para
 % Calculate reproduction number R0
 k = calcR0(k,model);
 
+
 %% Comparison of the fitted and real data
 %MATLAB default colors:
 loadDefaultColors();
@@ -217,19 +217,25 @@ global blueDef orangeDef yellowDef purpleDef greenDef lightblueDef brownDef
 
 % [EDITABLE] Property garis untuk plot state sistem, ubah sesuai jumlah state
 stateLineProp = cell(numel(model.allStateName),3);
-stateLineProp(1,:) = {blueDef,'-',1.5};
-stateLineProp(2,:) = {'r','-',1.5};
-stateLineProp(3,:) = {greenDef,'-',1.5};
-stateLineProp(4,:) = {purpleDef,'-',1.5};
+stateLineProp(find(strcmp(model.allStateName,'S')),:) = {blueDef,'-',2};
+stateLineProp(find(strcmp(model.allStateName,'Q')),:) = {'r','-',2};
+stateLineProp(find(strcmp(model.allStateName,'R')),:) = {greenDef,'-',2};
+stateLineProp(find(strcmp(model.allStateName,'D')),:) = {purpleDef,'-',2};
+stateLineProp(find(strcmp(model.allStateName,'Q_s')),:) = {'m','-.',1.5};
+stateLineProp(find(strcmp(model.allStateName,'R_s')),:) = {'g','-.',1.5};
+stateLineProp(find(strcmp(model.allStateName,'D_s')),:) = {brownDef,'-.',1.5};
 
 % Atur property plot kebijakan simulasi berbeda agar lebih mudah dilihat
 for i=1:numel(k)
     k{i}.stateLineProp = stateLineProp;
     if(i==lockdown.index || i==lockdown.index+1)
-        k{i}.stateLineProp(1,:) = {blueDef,'--',1.5};
-        k{i}.stateLineProp(2,:) = {'r','--',1.5};
-        k{i}.stateLineProp(3,:) = {greenDef,'--',1.5};
-        k{i}.stateLineProp(4,:) = {purpleDef,'--',1.5};
+        k{i}.stateLineProp(find(strcmp(model.allStateName,'S')),:) = {blueDef,'--',2};
+        k{i}.stateLineProp(find(strcmp(model.allStateName,'Q')),:) = {'r','--',2};
+        k{i}.stateLineProp(find(strcmp(model.allStateName,'R')),:) = {greenDef,'--',2};
+        k{i}.stateLineProp(find(strcmp(model.allStateName,'D')),:) = {purpleDef,'--',2};
+        k{i}.stateLineProp(find(strcmp(model.allStateName,'Q_s')),:) = {'m',':',1.5};
+        k{i}.stateLineProp(find(strcmp(model.allStateName,'R_s')),:) = {'g',':',1.5};
+        k{i}.stateLineProp(find(strcmp(model.allStateName,'D_s')),:) = {brownDef,':',1.5};
     end
 end
 
@@ -237,17 +243,17 @@ end
 k{1}.vlColor = 'g';
 k{2}.vlColor = lightblueDef;
 k{3}.vlColor = yellowDef;
-k{4}.vlColor = 'b';
-k{5}.vlColor = orangeDef;
-k{6}.vlColor = 'k';
-k{7}.vlColor = brownDef;
+% k{4}.vlColor = 'b';
+% k{5}.vlColor = orangeDef;
+% k{6}.vlColor = 'k';
+% k{7}.vlColor = brownDef;
 % k{8}.vlColor = 'm';
 
 % [EDITABLE] Index untuk meletakkan cursor secara otomatis pada nilai maksimum figure
 cursorIndexMax{1}.kebijakan = rfi; % indeks kebijakan tanpa lockdown yang akan diberi cursor
-cursorIndexMax{1}.stateName = {'I'}; % nama state yang akan diberi cursor
+cursorIndexMax{1}.stateName = {'Q','Q_s'}; % nama state yang akan diberi cursor
 cursorIndexMax{2}.kebijakan = lockdown.index+1; % indeks kebijakan pasca-lockdown yang akan diberi cursor
-cursorIndexMax{2}.stateName = {'I'}; % nama state yang akan diberi cursor
+cursorIndexMax{2}.stateName = {'Q','Q_s'}; % nama state yang akan diberi cursor
 
 % garis batas kapasitas RS 
 if(exist('kapasitasRS'))
@@ -291,7 +297,7 @@ printLockdownDetails(lockdown);
 title(['Fitting & Simulasi State Fitting Saja dengan Model ' model.name ' untuk ' namaDaerah ' per Kebijakan']);
 
 % custom states
-customStates = {'I','D'}; % [EDITABLE] Ubah nama state sesuai yang ingin di-plot. Pisahkan dengan koma ','.
+customStates = {'Q','D','Q_s','D_s'}; % [EDITABLE] Ubah nama state sesuai yang ingin di-plot. Pisahkan dengan koma ','.
 hFigCustomStates = figure('units','normalized','outerposition',[0 0 1 1]);
 k = plotCustomStates(k,customStates,model, hFigCustomStates,cursorIndexMax); 
 k = plotVerticalLines(k);
@@ -309,6 +315,56 @@ for i=1:numel(customStates)
 end
 title(['Fitting & Simulasi State ' stringCustom ' dengan model ' model.name ' untuk ' namaDaerah ' per Kebijakan']);
 
+%% Extended Kalman Filter (EKF)
+cursorIndexMax{1}.kebijakan = rfi; % indeks kebijakan tanpa lockdown yang akan diberi cursor
+cursorIndexMax{1}.stateName = {'Q','Q_s'}; % nama state yang akan diberi cursor
+cursorIndexMax{2}.kebijakan = lockdown.index+1; % indeks kebijakan pasca-lockdown yang akan diberi cursor
+cursorIndexMax{2}.stateName = {'Q','Q_s'}; % nama state yang akan diberi cursor
+
+customStatesEKF = {'Q','D','Q_s','D_s'}; % [EDITABLE] Ubah nama state sesuai yang ingin di-plot. Pisahkan dengan koma ','.
+stringCustomEKF = [];
+for i=1:numel(customStatesEKF)
+    stringCustomEKF = [stringCustomEKF ' ' customStatesEKF{i}];
+end
+
+QF = eye(numel(model.allStateName));
+RF = eye(numel(model.fitStateName));
+k{rfi} = EKFcustom(k{rfi},k{rfi}.paramEst,QF,RF,model); 
+hFigCustomStatesEKF = figure('units','normalized','outerposition',[0 0 1 1]);
+k{rfi} = plotCustomStatesEKF(k{rfi},customStatesEKF,model, hFigCustomStatesEKF,cursorIndexMax);
+k = plotVerticalLines(k);
+plotLegend(k);
+title(['Fitting & Simulasi State ' stringCustomEKF ' dengan model ' model.name '+EKF untuk ' namaDaerah ' per Kebijakan']);
+
+QF = eye(numel(model.allStateName));
+RF = 1e6*eye(numel(model.fitStateName));
+k{rfi} = EKFcustom(k{rfi},k{rfi}.paramEst,QF,RF,model); 
+hFigCustomStatesEKF1 = figure('units','normalized','outerposition',[0 0 1 1]);
+k{rfi} = plotCustomStatesEKF(k{rfi},customStatesEKF,model, hFigCustomStatesEKF1,cursorIndexMax); 
+k = plotVerticalLines(k);
+plotLegend(k);
+title(['Fitting & Simulasi State ' stringCustomEKF ' dengan model ' model.name '+EKF untuk ' namaDaerah ' per Kebijakan']);
+
+QF = 1e6*eye(numel(model.allStateName));
+RF = eye(numel(model.fitStateName));
+k{rfi} = EKFcustom(k{rfi},k{rfi}.paramEst,QF,RF,model); 
+hFigCustomStatesEKF2 = figure('units','normalized','outerposition',[0 0 1 1]);
+k{rfi} = plotCustomStatesEKF(k{rfi},customStatesEKF,model, hFigCustomStatesEKF2,cursorIndexMax); 
+k = plotVerticalLines(k);
+plotLegend(k);
+title(['Fitting & Simulasi State ' stringCustomEKF ' dengan model ' model.name '+EKF untuk ' namaDaerah ' per Kebijakan']);
+
+customStatesEKF = model.allStateName; %{'S','Q','R','D','Q_s','R_s','D_s'};
+QF = eye(numel(model.allStateName));
+RF = eye(numel(model.fitStateName));
+k{rfi} = EKFcustom(k{rfi},k{rfi}.paramEst,QF,RF,model); 
+hFigCustomStatesEKFall = figure('units','normalized','outerposition',[0 0 1 1]);
+k{rfi} = plotCustomStatesEKF(k{rfi},customStatesEKF,model, hFigCustomStatesEKFall,cursorIndexMax);
+k = plotVerticalLines(k);
+plotLegend(k);
+title(['Fitting & Simulasi Semua State dengan model ' model.name '+EKF untuk ' namaDaerah ' per Kebijakan']);
+
+%% Save results
 % save peak info
 saveDir = [mainDir '/results/' model.name '/' keteranganSimulasi '/peakInfo/'];
 mkdir(saveDir);
@@ -345,6 +401,13 @@ saveas(hFigFittingStates,[saveDir '/FittingStates.fig']);
 saveas(hFigFittingStates,[saveDir '/FittingStates.png']);
 saveas(hFigCustomStates,[saveDir '/CustomStates.fig']);
 saveas(hFigCustomStates,[saveDir '/CustomStates.png']);
+saveas(hFigCustomStatesEKF,[saveDir '/EKFQRidentity.fig']);
+saveas(hFigCustomStatesEKF,[saveDir '/EKFQRidentity.png']);
+saveas(hFigCustomStatesEKF1,[saveDir '/EKFQidentityRhigh.fig']);
+saveas(hFigCustomStatesEKF1,[saveDir '/EKFQidentityRhigh.png']);
+saveas(hFigCustomStatesEKF2,[saveDir '/EKFQhighRidentity.fig']);
+saveas(hFigCustomStatesEKF2,[saveDir '/EKFQhighRidentity.png']);
+
 fprintf(['Grafik berhasil disimpan di:']); saveDir
 else
     fprintf(['Grafik TIDAK disimpan.\n Jika masih ingin menyimpan, simpan secara manual atau jalankan ulang script [F5].\n']);

@@ -30,14 +30,8 @@ global Npop; Npop = 10770487; % DKI Jakarta total population
 % [EDITABLE] Kebijakan: disimpan dalam cell struct k{i}, di mana i adalah urutan kebijakan
 % ubah startDate & endDate sesuai kebijakan. Jika tidak tahu endDate, tidak usah diisi, data terakhir yang diambil.
 % numDays = berapa hari akan disimulasikan setelah hari terakhir kebijakan?
-k{1}.name = 'PSBB Masa Transisi Kurva Menurun'; 
-k{1}.startDate = '2020-06-05'; k{1}.endDate = '2020-07-06'; k{1}.numDays = 14;
-k{2}.name = 'PSBB Masa Transisi Kurva Meningkat'; 
-k{2}.startDate = '2020-07-07'; %k{2}.endDate = '2020-08-27'; k{2}.numDays = 14;
-% k{3}.name = 'Long Weekend 28 Agustus 2020'; 
-% k{3}.startDate = '2020-08-28';
-% k{3}.name = 'PSBB Total 14 September 2020';
-% k{3}.startDate = '2020-09-14';
+k{1}.name = 'PSBB Masa Transisi'; 
+k{1}.startDate = '2020-06-05'; k{1}.endDate = '2020-09-13'; k{1}.numDays = 14;
 rfi = numel(k); % real fitting index: indeks kebijakan terakhir yang merupakan data fitting nyata
 
 lockdown.index = rfi+1;
@@ -91,8 +85,8 @@ k{rfi}.numDays = datenum(k{lockdown.index}.timeFit{1}-k{rfi}.timeFit{end})+lockd
 % supaya tanggal akhir simulasi tanpa lockdown = dengan lockdown
 
 % [EDITABLE] keterangan simulasi berdasarkan konfigurasi fitting & simulasi lockdown
-keteranganSimulasi = ['MulaiFiting' datestr(k{1}.timeFit{1},'yyyy-mm-dd') ...
-            'AkhirFitting' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd') ...
+keteranganSimulasi = ['MulaiFit' datestr(k{1}.timeFit{1},'yyyy-mm-dd') ...
+            'AkhirFit' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd') ...
           'Lockdown' lockdown.startDate 'Durasi' num2str(lockdown.numDays)];
 
 %% [EDITABLE] Lower bound of parameter for estimation constraint
@@ -138,9 +132,9 @@ for j=1:numel(model.fitStateName)
 end
 %Jika data fitting tidak tersedia, set manual:
 % jumlah selain yang suceptible (hanya berlaku untuk model ini), jika model lain ubah manual
-k{1}.y0(find(strcmp(model.allStateName, 'I'))) = k{1}.y0(find(strcmp(model.allStateName, 'Q'))) + ...
-                                                 k{1}.y0(find(strcmp(model.allStateName, 'R'))) + ...
-                                                 k{1}.y0(find(strcmp(model.allStateName, 'D'))); %10;
+k{1}.y0(find(strcmp(model.allStateName, 'I'))) = k{1}.y0(find(strcmp(model.allStateName, 'Q'))); % + ...
+%                                                  k{1}.y0(find(strcmp(model.allStateName, 'R'))) + ...
+%                                                  k{1}.y0(find(strcmp(model.allStateName, 'D'))); %10;
 notS = sum(k{1}.y0); 
 k{1}.y0(find(strcmp(model.allStateName, 'S'))) =  Npop - notS;
 
@@ -241,7 +235,7 @@ end
 k{1}.vlColor = 'g';
 k{2}.vlColor = lightblueDef;
 k{3}.vlColor = yellowDef;
-k{4}.vlColor = 'b';
+% k{4}.vlColor = 'b';
 % k{5}.vlColor = orangeDef;
 % k{6}.vlColor = 'k';
 % k{7}.vlColor = brownDef;
@@ -249,13 +243,9 @@ k{4}.vlColor = 'b';
 
 % [EDITABLE] Index untuk meletakkan cursor secara otomatis pada nilai maksimum figure
 cursorIndexMax{1}.kebijakan = rfi; % indeks kebijakan tanpa lockdown yang akan diberi cursor
-cursorIndexMax{1}.stateName = 'I'; % nama state yang akan diberi cursor
-cursorIndexMax{2}.kebijakan = rfi; % indeks kebijakan tanpa lockdown yang akan diberi cursor
-cursorIndexMax{2}.stateName = 'Q'; % nama state yang akan diberi cursor
-cursorIndexMax{3}.kebijakan = lockdown.index+1; % indeks kebijakan pasca-lockdown yang akan diberi cursor
-cursorIndexMax{3}.stateName = 'I'; % nama state yang akan diberi cursor
-cursorIndexMax{4}.kebijakan = lockdown.index+1; % indeks kebijakan pasca-lockdown yang akan diberi cursor
-cursorIndexMax{4}.stateName = 'Q'; % nama state yang akan diberi cursor
+cursorIndexMax{1}.stateName = {'I','Q'}; % nama state yang akan diberi cursor
+cursorIndexMax{2}.kebijakan = lockdown.index+1; % indeks kebijakan pasca-lockdown yang akan diberi cursor
+cursorIndexMax{2}.stateName = {'I','Q'}; % nama state yang akan diberi curso
 
 % garis batas kapasitas RS 
 if(exist('kapasitasRS'))

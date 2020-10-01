@@ -35,29 +35,21 @@ global Npop; Npop = 10770487; % DKI Jakarta total population
 % [EDITABLE] Kebijakan: disimpan dalam cell struct k{i}, di mana i adalah urutan kebijakan
 % ubah startDate & endDate sesuai kebijakan. Jika tidak tahu endDate, tidak usah diisi, data terakhir yang diambil.
 % numDays = berapa hari akan disimulasikan setelah hari terakhir kebijakan?
-k{1}.name = 'Tanpa Kebijakan'; 
-k{1}.startDate = '2020-03-01'; k{1}.endDate = '2020-03-18'; k{1}.numDays = 14;
-k{2}.name = 'Larangan Kerumunan Maklumat POLRI'; 
-k{2}.startDate = '2020-03-19'; k{2}.endDate = '2020-04-09'; k{2}.numDays = 14;
-k{3}.name = 'PSBB Permenkesri No. 9 Tahun 2020'; 
-k{3}.startDate = '2020-04-10'; k{3}.endDate = '2020-06-04'; k{3}.numDays = 14;
-k{4}.name = 'PSBB Masa Transisi Kurva Menurun'; 
-k{4}.startDate = '2020-06-05'; k{4}.endDate = '2020-07-06'; k{4}.numDays = 14;
-k{5}.name = 'PSBB Masa Transisi Kurva Meningkat'; 
-k{5}.startDate = '2020-07-07'; k{5}.endDate = '2020-09-14'; %k{5}.endDate = '2020-08-27'; k{5}.numDays = 14;
-% k{6}.name = 'Long Weekend 28 Agustus 2020'; 
-% k{6}.startDate = '2020-08-28';
+k{1}.name = 'PSBB Masa Transisi'; %k{1}.startDate = '2020-07-07'; 
+k{1}.startDate = '2020-06-05'; k{1}.endDate = '2020-09-13'; k{1}.numDays = 14;
+k{2}.name = 'PSBB Total 14 September 2020';
+k{2}.startDate = '2020-09-14';
 rfi = numel(k); % real fitting index: indeks kebijakan terakhir yang merupakan data fitting nyata
 
 lockdown.index = rfi+1;
 % lockdown.startDate = '2020-07-27';
-lockdown.startDate = '2020-09-14'; 
+lockdown.startDate = '2020-09-29'; 
 % lockdown.startDate = '2020-11-24'; 
 % lockdown.startDate = '2020-12-25'; 
 % lockdown.startDate = '2021-02-08'; 
 % lockdown.startDate = '2021-03-14'; 
 lockdown.numDays = 14; % durasi simulasi lockdown total
-postlockdown.numDays = 420; % durasi simulasi pasca lockdown
+postlockdown.numDays = 730; %420; % durasi simulasi pasca lockdown
 k{lockdown.index}.name = 'Simulasi Lockdown Total';
 k{lockdown.index}.startDate = lockdown.startDate; 
 k{lockdown.index}.endDate = lockdown.startDate; 
@@ -100,8 +92,8 @@ k{rfi}.numDays = datenum(k{lockdown.index}.timeFit{1}-k{rfi}.timeFit{end})+lockd
 % supaya tanggal akhir simulasi tanpa lockdown = dengan lockdown
 
 % [EDITABLE] keterangan simulasi berdasarkan konfigurasi fitting & simulasi lockdown
-keteranganSimulasi = ['MulaiFiting' datestr(k{1}.timeFit{1},'yyyy-mm-dd') ... %'LongWeekend28Agustus' ...
-            'AkhirFitting' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd') ...
+keteranganSimulasi = ['MulaiFit' datestr(k{1}.timeFit{1},'yyyy-mm-dd') ... 
+            'AkhirFit' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd') ...
           'Lockdown' lockdown.startDate 'Durasi' num2str(lockdown.numDays)];
 
 %% [EDITABLE] Lower bound of parameter for estimation constraint
@@ -238,9 +230,9 @@ k{1}.vlColor = 'g';
 k{2}.vlColor = lightblueDef;
 k{3}.vlColor = yellowDef;
 k{4}.vlColor = 'b';
-k{5}.vlColor = orangeDef;
-k{6}.vlColor = 'k';
-k{7}.vlColor = brownDef;
+% k{5}.vlColor = orangeDef;
+% k{6}.vlColor = 'k';
+% k{7}.vlColor = brownDef;
 % k{8}.vlColor = 'm';
 
 % [EDITABLE] Index untuk meletakkan cursor secara otomatis pada nilai maksimum figure
