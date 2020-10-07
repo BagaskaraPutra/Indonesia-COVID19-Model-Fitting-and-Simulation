@@ -21,8 +21,8 @@ end
 
 % [EDITABLE] Jika ingin mengubah model, state fiting, dan parameter; edit variable2 di bawah ini:
 namaDaerah = 'DKI Jakarta';
-model.name = 'SIRQN';
-model.dir = ['../modelSIRQN'];
+model.name = 'SIRQ';
+model.dir = ['../modelSIRQ'];
 model = loadModel(model);
 global Npop; Npop = 10770487; % DKI Jakarta total population
 % kapasitasRS = 12150; % dari kapasitas RS 70% pada 28 Agustus 2020
@@ -200,7 +200,6 @@ for j=1:numel(nonFitIndex)
 end
 k{lockdown.index}.paramEst = k{rfi}.paramEst; % set parameter sama seperti kebijakan sebelumnya,
 k{lockdown.index}.paramEst(find(strcmp(model.paramName, 'beta'))) = 0; % namun nilai beta di-set nol
-k{lockdown.index}.paramEst(find(strcmp(model.paramName, 'r_S_NQ'))) = 0; % namun nilai r_S_NQ di-set nol
 k{lockdown.index} = simulateModel(k{lockdown.index},k{lockdown.index}.paramEst,model);
 
 % [EDITABLE] Simulasi Kebijakan Pelonggaran Lockdown Total
@@ -223,9 +222,6 @@ global blueDef orangeDef yellowDef purpleDef greenDef lightblueDef brownDef
 % [EDITABLE] Property garis untuk plot state sistem, ubah sesuai jumlah state
 stateLineProp = cell(numel(model.allStateName),3);
 stateLineProp(find(strcmp(model.allStateName,'S')),:) = {blueDef,'-',1.5};
-stateLineProp(find(strcmp(model.allStateName,'NQ')),:) = {yellowDef,'-',1.5};
-stateLineProp(find(strcmp(model.allStateName,'NR')),:) = {purpleDef,'-',1.5};
-stateLineProp(find(strcmp(model.allStateName,'ND')),:) = {brownDef,'-',1.5};
 stateLineProp(find(strcmp(model.allStateName,'I')),:) = {[0.5 0.5 0.5],'-',1.5};
 stateLineProp(find(strcmp(model.allStateName,'Q')),:) = {'m','-',1.5};
 stateLineProp(find(strcmp(model.allStateName,'R')),:) = {greenDef,'-',1.5};
@@ -237,9 +233,6 @@ for i=1:numel(k)
     if(i==lockdown.index || i==lockdown.index+1)
         k{i}.stateLineProp = cell(numel(model.allStateName),3);
         k{i}.stateLineProp(find(strcmp(model.allStateName,'S')),:) = {blueDef,'--',1.5};
-        k{i}.stateLineProp(find(strcmp(model.allStateName,'NQ')),:) = {yellowDef,'--',1.5};
-        k{i}.stateLineProp(find(strcmp(model.allStateName,'NR')),:) = {purpleDef,'--',1.5};
-        k{i}.stateLineProp(find(strcmp(model.allStateName,'ND')),:) = {brownDef,'--',1.5};
         k{i}.stateLineProp(find(strcmp(model.allStateName,'I')),:) = {[0.5 0.5 0.5],'--',1.5};
         k{i}.stateLineProp(find(strcmp(model.allStateName,'Q')),:) = {'m','--',1.5};
         k{i}.stateLineProp(find(strcmp(model.allStateName,'R')),:) = {greenDef,'--',1.5};

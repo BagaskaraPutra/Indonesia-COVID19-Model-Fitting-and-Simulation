@@ -1,7 +1,6 @@
 [allStateName]:
 S
 NQ
-NR
 ND
 I
 Q
@@ -9,7 +8,6 @@ R
 D
 [fitStateName]:
 NQ
-NR
 ND
 Q
 R
@@ -17,8 +15,7 @@ D
 [paramName]:
 beta
 r_S_NQ
-r_NR_S
-r_NQ_NR
+r_NQ_S
 r_NQ_Q
 r_NQ_ND
 r_I_Q
