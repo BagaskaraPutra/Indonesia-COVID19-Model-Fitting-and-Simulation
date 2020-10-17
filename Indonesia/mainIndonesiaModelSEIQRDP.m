@@ -270,14 +270,9 @@ k{3}.vlColor = yellowDef;
 
 % [EDITABLE] Index untuk meletakkan cursor secara otomatis pada nilai maksimum figure
 cursorIndexMax{1}.kebijakan = rfi; % indeks kebijakan tanpa lockdown yang akan diberi cursor
-cursorIndexMax{1}.stateName = 'I'; % nama state yang akan diberi cursor
-cursorIndexMax{2}.kebijakan = rfi; % indeks kebijakan tanpa lockdown yang akan diberi cursor
-cursorIndexMax{2}.stateName = 'Q'; % nama state yang akan diberi cursor
-cursorIndexMax{3}.kebijakan = lockdown.index+1; % indeks kebijakan pasca-lockdown yang akan diberi cursor
-cursorIndexMax{3}.stateName = 'I'; % nama state yang akan diberi cursor
-cursorIndexMax{4}.kebijakan = lockdown.index+1; % indeks kebijakan pasca-lockdown yang akan diberi cursor
-cursorIndexMax{4}.stateName = 'Q'; % nama state yang akan diberi cursor
-
+cursorIndexMax{1}.stateName = {'I','Q'}; % nama state yang akan diberi cursor
+cursorIndexMax{2}.kebijakan = lockdown.index+1; % indeks kebijakan pasca-lockdown yang akan diberi cursor
+cursorIndexMax{2}.stateName = {'I','Q'}; % nama state yang akan diberi cursor
 % garis batas kapasitas RS 
 if(exist('kapasitasRS'))
     if(softwareName == 'matlab')
