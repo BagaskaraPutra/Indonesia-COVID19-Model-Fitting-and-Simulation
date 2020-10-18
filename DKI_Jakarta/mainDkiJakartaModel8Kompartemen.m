@@ -195,7 +195,7 @@ k{1}.vlColor = 'g';
 
 % [EDITABLE] Index untuk meletakkan cursor secara otomatis pada nilai maksimum figure
 cursorIndexMax{1}.kebijakan = rfi; % indeks kebijakan tanpa lockdown yang akan diberi cursor
-cursorIndexMax{1}.stateName = 'H'; % nama state yang akan diberi cursor
+cursorIndexMax{1}.stateName = {'H'}; % nama state yang akan diberi cursor
 
 % garis batas kapasitas RS 
 if(exist('kapasitasRS'))
