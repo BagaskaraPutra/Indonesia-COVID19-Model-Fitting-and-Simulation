@@ -1,8 +1,9 @@
-%% SQRshadow
+%% 8 compartments model DKI Jakarta per Kebijakan:
 % Semua yang ada komentar [EDITABLE] dapat diprioritaskan untuk diedit jika
 % ada perubahan model, parameter model, parameter plotting, kebijakan, dll.
 
-%By: Bagaskara P.P., Last Modified: 2020-10-15
+%By: Bobby R.D., Last Modified: 2020-04-01
+%By: Bagaskara P.P., Last Modified: 2020-09-02
 
 clear all; close all; clc; 
 mainDir = pwd; % get current main directory 
@@ -20,22 +21,18 @@ end
 
 % [EDITABLE] Jika ingin mengubah model, state fiting, dan parameter; edit variable2 di bawah ini:
 namaDaerah = 'DKI Jakarta';
-model.name = 'SQRshadow';
-model.dir = ['../modelSQRshadow'];
+model.name = '8Kompartemen';
+model.dir = ['../model8Kompartemen'];
 model = loadModel(model);
 global Npop; Npop = 10770487; % DKI Jakarta total population
-% kapasitasRS = 12150; % dari kapasitas RS 70% pada 28 Agustus 2020
+% kapasitasRS = 12150; % dari kapasitas RS 70% pada 31 Agustus
 
 % [EDITABLE] Kebijakan: disimpan dalam cell struct k{i}, di mana i adalah urutan kebijakan
 % ubah startDate & endDate sesuai kebijakan. Jika tidak tahu endDate, tidak usah diisi, data terakhir yang diambil.
 % numDays = berapa hari akan disimulasikan setelah hari terakhir kebijakan?
-% k{1}.name = 'PSBB Masa Transisi';
-k{1}.name = 'PSBB Dummy'; 
-k{1}.startDate = '2020-06-05'; k{1}.endDate = '2020-09-28'; k{1}.numDays = 730;
-%k{1}.endDate = '2020-09-13'; k{1}.numDays = 14;
-% k{2}.name = 'PSBB Total 14 September 2020';
-% k{2}.startDate = '2020-09-14'; k{2}.endDate = '2020-09-28'; k{2}.numDays = 730;
-rfi = numel(k);
+k{1}.name = 'Istilah Lama Dummy Data'; 
+k{1}.startDate = '2020-03-01'; k{1}.endDate = '2020-06-18'; k{1}.numDays = 730;
+rfi = numel(k); % real fitting index: indeks kebijakan terakhir yang merupakan data fitting nyata
 
 % Inisialisasi semua state berdasarkan model.allStateName baik ada data fitting maupun tidak
 for i=1:numel(k)
@@ -47,18 +44,16 @@ end
 
 % Ambil data dari xls atau csv
 if(softwareName == 'matlab')
-    lama = getDataIstilahLamaModelSQRshadow('COVID19_DkiJakarta_IstilahLama.xls'); %[EDITABLE Matlab]
-    baru = getDataIstilahBaruModelSQRshadow('COVID19_DkiJakarta_IstilahBaru.xls'); %[EDITABLE Matlab]
+    lama = getDataIstilahLamaModel8Kompartemen('COVID19_DkiJakarta_IstilahLama.xls'); %[EDITABLE Matlab]
 else
-    lama = getDataIstilahLamaModelSQRshadow('COVID19_DkiJakarta_IstilahLama.csv'); %[EDITABLE Octave]
-    baru = getDataIstilahBaruModelSQRshadow('COVID19_DkiJakarta_IstilahBaru.csv'); %[EDITABLE Octave]
+    lama = getDataIstilahLamaModel8Kompartemen('COVID19_DkiJakarta_IstilahLama.csv'); %[EDITABLE Octave]
 end
 
 % Gabung data istilah lama (sampai dengan 16 Juli) & istilah baru (setelah 16 Juli)
 for i=1:numel(model.fitStateName)
-    gabung.(model.fitStateName{i}) = [lama.(model.fitStateName{i}) baru.(model.fitStateName{i})];
+    gabung.(model.fitStateName{i}) = [lama.(model.fitStateName{i})];
 end
-gabung.timeFit = [lama.timeFit baru.timeFit];
+gabung.timeFit = [lama.timeFit];
 
 % Potong data sesuai tanggal kebijakan, lalu simpan dalam struct k{i}
 for i=1:numel(k)
@@ -66,30 +61,36 @@ for i=1:numel(k)
 end
 
 % [EDITABLE] keterangan simulasi berdasarkan konfigurasi fitting & simulasi lockdown
-keteranganSimulasi = ['DummyData'];
+keteranganSimulasi = ['DummyDataAkhirFitting' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd')];
 
-%% [EDITABLE] Simulate manually set parameters
-
-for i=1:numel(k) 
-%     k{i}.paramDummy(find(strcmp(model.paramName, 'beta'))) = 0.08;
-%     k{i}.paramDummy(find(strcmp(model.paramName, 'Rt'))) = 0.98; 
-%     k{i}.paramDummy(find(strcmp(model.paramName, 'Tinf'))) = 8.53;
-%     k{i}.paramDummy(find(strcmp(model.paramName, 'Trecov'))) = 16.54;
-%     k{i}.paramDummy(find(strcmp(model.paramName, 'Tdeath'))) = 200;
-%     k{i}.paramDummy(find(strcmp(model.paramName, 'lambda'))) = 1e-5;
+%% [EDITABLE] Simulate manually set dummy parameters
+for i=1:numel(k)
+    k{i}.paramDummy(find(strcmp(model.paramName, 'q1'))) = 0.104019975566408; %0.2;
+    k{i}.paramDummy(find(strcmp(model.paramName, 'q2'))) = 0.0254649082270350; %0.1;
     
-%     k{i}.paramDummy(find(strcmp(model.paramName, 'beta'))) = 2e-1;
-%     k{i}.paramDummy(find(strcmp(model.paramName, 'Rt'))) = 2.0; 
-%     k{i}.paramDummy(find(strcmp(model.paramName, 'Tinf'))) = 6; 
-%     k{i}.paramDummy(find(strcmp(model.paramName, 'Trecov'))) = 15;
-%     k{i}.paramDummy(find(strcmp(model.paramName, 'Tdeath'))) = 20;
-%     k{i}.paramDummy(find(strcmp(model.paramName, 'lambda'))) = 5e-2;
+    k{i}.paramDummy(find(strcmp(model.paramName, 'betat'))) = 4.34204393067696e-08; %1e-7;
+    k{i}.paramDummy(find(strcmp(model.paramName, 'betav'))) = 2.94611788769311e-12; %1e-7;
+    
+    k{i}.paramDummy(find(strcmp(model.paramName, 'beta1'))) = 2.36215340041881e-08; %1e-7;
+    k{i}.paramDummy(find(strcmp(model.paramName, 'beta2'))) = 1.77648151134506e-08; %1.0;
+    k{i}.paramDummy(find(strcmp(model.paramName, 'beta3'))) = 1.77499414139147e-08; %1e-2;
+    k{i}.paramDummy(find(strcmp(model.paramName, 'beta4'))) = 7.45421016285879e-09; %1e-7;
 
-    k{i}.paramDummy(find(strcmp(model.paramName, 'beta'))) = 2e-1;
-    k{i}.paramDummy(find(strcmp(model.paramName, 'gamma'))) = 1/15;
-    k{i}.paramDummy(find(strcmp(model.paramName, 'muI'))) = 1/20;
-    k{i}.paramDummy(find(strcmp(model.paramName, 'beta_s'))) = 2.0/6;
-    k{i}.paramDummy(find(strcmp(model.paramName, 'lambda'))) = 5e-2;
+    k{i}.paramDummy(find(strcmp(model.paramName, 'eta1'))) = 0.00586935331811477; %1.0;
+    k{i}.paramDummy(find(strcmp(model.paramName, 'eta2'))) = 0.00872402720537740; %1.0;
+    k{i}.paramDummy(find(strcmp(model.paramName, 'eta3'))) = 0.00383283240925105; %0e-2;
+
+    k{i}.paramDummy(find(strcmp(model.paramName, 'delta1'))) = 0.000957940140938790; %1e-3;
+    k{i}.paramDummy(find(strcmp(model.paramName, 'delta2'))) = 0.00104392455336793; %1e-2;
+    k{i}.paramDummy(find(strcmp(model.paramName, 'theta'))) = 0.0505786405131493; %1/2.9;
+
+    k{i}.paramDummy(find(strcmp(model.paramName, 'f1'))) = 1458.26256241399; %2160;
+    k{i}.paramDummy(find(strcmp(model.paramName, 'f2'))) = 720.016567197310; %1440;
+    k{i}.paramDummy(find(strcmp(model.paramName, 'f3'))) = 1654.22654225347; %2592;
+    k{i}.paramDummy(find(strcmp(model.paramName, 'd'))) = 151.964301792858; %172.8;
+    k{i}.paramDummy(find(strcmp(model.paramName, 'betav1'))) = 9.93555594062767e-14; %3e-7;
+    k{i}.paramDummy(find(strcmp(model.paramName, 'theta1'))) = 0.000114226319951830; %1/10;
+    k{i}.paramDummy(find(strcmp(model.paramName, 'sigma'))) = 0.00104818413747778; %1/5.2;
 end
 
 % Find index for non-fitting data (not available from real world data)
@@ -108,16 +109,15 @@ end
 
 % First segment only
 for j=1:numel(model.fitStateName)
-    k{1}.y0(find(strcmp(model.allStateName, model.fitStateName(j)))) = k{1}.(model.fitStateName{j})(1);
+    k{1}.y0(find(strcmp(model.allStateName, model.fitStateName{j}))) = k{1}.(model.fitStateName{j})(1);
 end
 %Jika data fitting tidak tersedia, set manual:
+k{1}.y0(find(strcmp(model.allStateName, 'Sq'))) = 0;
+k{1}.y0(find(strcmp(model.allStateName, 'E1'))) = 0.87*k{1}.('E2')(1);
+k{1}.y0(find(strcmp(model.allStateName, 'E2'))) = 0.13*k{1}.('E2')(1);
+k{1}.y0(find(strcmp(model.allStateName, 'V'))) = 21080;
 % jumlah selain yang suceptible (hanya berlaku untuk model ini), jika model lain ubah manual
-k{1}.y0(find(strcmp(model.allStateName, 'Q_s'))) = k{1}.y0(find(strcmp(model.allStateName, 'Q'))); %...
-%                                                    + k{1}.y0(find(strcmp(model.allStateName, 'R'))) ...
-%                                                    + k{1}.y0(find(strcmp(model.allStateName, 'D')));
-k{1}.y0(find(strcmp(model.allStateName, 'R_s'))) = 10; %k{1}.y0(find(strcmp(model.allStateName, 'R')));
-k{1}.y0(find(strcmp(model.allStateName, 'D_s'))) = k{1}.y0(find(strcmp(model.allStateName, 'D')));
-notS = sum(k{1}.y0); 
+notS = sum(k{1}.y0)-k{1}.y0(find(strcmp(model.allStateName, 'V'))); 
 k{1}.y0(find(strcmp(model.allStateName, 'S'))) =  Npop - notS;
 k{1} = simulateModel(k{1},k{1}.paramDummy,model);
 
@@ -138,80 +138,89 @@ for i=2:rfi
     k{i} = simulateModel(k{i},k{i}.paramDummy,model);
 end
 
-% Calculate reproduction number R0
-% k = calcR0(k,model);
-
 %% Make simulated data into fitting data
 for fIdx=1:numel(model.fitStateName)
     k{1}.(model.fitStateName{fIdx}) = k{1}.Yest(1:numel(k{1}.timeFit),...
         find(strcmp(model.allStateName,model.fitStateName{fIdx})))';
 end
 
-%% Fit dummy data
-% [EDITABLE] Lower bound of parameter for estimation constraint
+%% [EDITABLE] Lower bound of parameter for estimation constraint
 for i=1:numel(k) 
-%     k{i}.lbParam = zeros(1,size(model.paramName,2));
-
-%     k{i}.lbParam(find(strcmp(model.paramName, 'beta'))) = 0;
-%     k{i}.lbParam(find(strcmp(model.paramName, 'Rt'))) = 0.1;
-%     k{i}.lbParam(find(strcmp(model.paramName, 'Tinf'))) = 1.5;
-%     k{i}.lbParam(find(strcmp(model.paramName, 'Trecov'))) = 7;
-%     k{i}.lbParam(find(strcmp(model.paramName, 'Tdeath'))) = 6;
-%     k{i}.lbParam(find(strcmp(model.paramName, 'lambda'))) = 0;
-
-%     k{i}.lbParam(find(strcmp(model.paramName, 'beta'))) = 0;
-%     k{i}.lbParam(find(strcmp(model.paramName, 'Rt'))) = 0.1;
-%     k{i}.lbParam(find(strcmp(model.paramName, 'Tinf'))) = 1.5;
-%     k{i}.lbParam(find(strcmp(model.paramName, 'Trecov'))) = 7;
-%     k{i}.lbParam(find(strcmp(model.paramName, 'Tdeath'))) = 6;
-%     k{i}.lbParam(find(strcmp(model.paramName, 'lambda'))) = 0;
-
-    k{i}.lbParam(find(strcmp(model.paramName, 'beta'))) = 0;
-    k{i}.lbParam(find(strcmp(model.paramName, 'gamma'))) = 0;
-    k{i}.lbParam(find(strcmp(model.paramName, 'muI'))) = 0;
-    k{i}.lbParam(find(strcmp(model.paramName, 'beta_s'))) = 0;
-    k{i}.lbParam(find(strcmp(model.paramName, 'lambda'))) = 0;
+    k{i}.lbParam = zeros(1,size(model.paramName,2));
 end
+% If you want to manually set parameter: 
+% k{1}.lbParam(find(strcmp(model.paramName, 'beta'))) = 0; OR k{1}.lbParam(1) = 0;
+k{1}.lbParam(find(strcmp(model.paramName, 'f1'))) = 864;
+k{1}.lbParam(find(strcmp(model.paramName, 'f2'))) = 432;
+k{1}.lbParam(find(strcmp(model.paramName, 'f3'))) = 864;
+k{1}.lbParam(find(strcmp(model.paramName, 'd'))) = 115.2;
 
-% [EDITABLE] Upper bound of parameter for estimation constraint
+%% [EDITABLE] Upper bound of parameter for estimation constraint
 for i=1:numel(k) 
-%     k{i}.ubParam = 1*ones(1,size(model.paramName,2));
-
-%     k{i}.ubParam(find(strcmp(model.paramName, 'beta'))) = 0.1;
-%     k{i}.ubParam(find(strcmp(model.paramName, 'Rt'))) = 1.0;
-%     k{i}.ubParam(find(strcmp(model.paramName, 'Tinf'))) = 10;
-%     k{i}.ubParam(find(strcmp(model.paramName, 'Trecov'))) = 20;
-%     k{i}.ubParam(find(strcmp(model.paramName, 'Tdeath'))) = 210;
-%     k{i}.ubParam(find(strcmp(model.paramName, 'lambda'))) = 5e-5;
-
-%     k{i}.ubParam(find(strcmp(model.paramName, 'beta'))) = 0.5;
-%     k{i}.ubParam(find(strcmp(model.paramName, 'Rt'))) = 4.0;
-%     k{i}.ubParam(find(strcmp(model.paramName, 'Tinf'))) = 10;
-%     k{i}.ubParam(find(strcmp(model.paramName, 'Trecov'))) = 50;
-%     k{i}.ubParam(find(strcmp(model.paramName, 'Tdeath'))) = 41; 
-%     k{i}.ubParam(find(strcmp(model.paramName, 'lambda'))) = 0.1;
-
-%     k{i}.ubParam(find(strcmp(model.paramName, 'beta'))) =10*2e-1;
-%     k{i}.ubParam(find(strcmp(model.paramName, 'gamma'))) = 10*1/15;
-%     k{i}.ubParam(find(strcmp(model.paramName, 'muI'))) = 10*1/20;
-%     k{i}.ubParam(find(strcmp(model.paramName, 'beta_s'))) = 10*2.0/6;
-%     k{i}.ubParam(find(strcmp(model.paramName, 'lambda'))) = 10*5e-2;
-    k{i}.ubParam = 10.*k{i}.paramDummy;
+    k{i}.ubParam = 1e-7*ones(1,size(model.paramName,2));
 end
+% If you want to manually set parameter: 
+% k{1}.ubParam(find(strcmp(model.paramName, 'beta'))) = 1; OR k{1}.ubParam(1) = 1;
 
-% [EDITABLE] Initial parameter guess
+k{1}.ubParam(find(strcmp(model.paramName, 'q1'))) = 0.2;
+k{1}.ubParam(find(strcmp(model.paramName, 'q2'))) = 0.1;
+
+k{1}.ubParam(find(strcmp(model.paramName, 'beta2'))) = 1.0;
+k{1}.ubParam(find(strcmp(model.paramName, 'beta3'))) = 1e-2;
+
+k{1}.ubParam(find(strcmp(model.paramName, 'eta1'))) = 1.0;
+k{1}.ubParam(find(strcmp(model.paramName, 'eta2'))) = 1.0;
+k{1}.ubParam(find(strcmp(model.paramName, 'eta3'))) = 1e-2;
+
+k{1}.ubParam(find(strcmp(model.paramName, 'delta1'))) = 1e-3;
+k{1}.ubParam(find(strcmp(model.paramName, 'delta2'))) = 1e-2;
+k{1}.ubParam(find(strcmp(model.paramName, 'theta'))) = 1/2.9;
+
+k{1}.ubParam(find(strcmp(model.paramName, 'f1'))) = 2160;
+k{1}.ubParam(find(strcmp(model.paramName, 'f2'))) = 1440;
+k{1}.ubParam(find(strcmp(model.paramName, 'f3'))) = 2592;
+k{1}.ubParam(find(strcmp(model.paramName, 'd'))) = 172.8;
+k{1}.ubParam(find(strcmp(model.paramName, 'betav1'))) = 3e-7;
+k{1}.ubParam(find(strcmp(model.paramName, 'theta1'))) = 1/10;
+k{1}.ubParam(find(strcmp(model.paramName, 'sigma'))) = 1/5.2;
+
+%% [EDITABLE] Initial parameter guess
 for i=1:numel(k)
-    k{i}.guessParam = 0.5.*(k{i}.lbParam+k{i}.ubParam); % if first time running, use this.
-%     k{i}.guessParam = [0.0500000000000000,2.05000000000000,30.5995792112422,59.9999841850553,5.75000000000000,0.0999999999999778];
+%     k{i}.guessParam = 0.5.*(k{i}.lbParam+k{i}.ubParam); % if first time running, use this.
+    k{i}.guessParam = [0.104019975566408 0.0254649082270350 4.34204393067696e-08 2.94611788769311e-12 2.36215340041881e-08 1.77648151134506e-08 1.77499414139147e-08 7.45421016285879e-09 0.00586935331811477 0.00872402720537740 0.00383283240925105 0.000957940140938790 0.00104392455336793 0.0505786405131493 1458.26256241399 720.016567197310 1654.22654225347 151.964301792858 9.93555594062767e-14 0.000114226319951830 0.00104818413747778]; %2020-04-20-22.06
 end
+% If you want to manually set parameter:
+% k{1}.guessParam(find(strcmp(model.paramName, 'beta'))) = 0.5; OR k{1}.guessParam(1) = 0.5;
+
+%% Fit and Simulate Iteratively for Real Fitting Index (rfi) Segments
 
 % Fitting of the model to real data
-% k{1}.tolX = 1.9e-11; k{1}.tolFun = 1.9e-11; % Optimization options
-k{1}.tolX = 1e-12; k{1}.tolFun = 1e-12; % Optimization options
+k{1}.tolX = 2.0e-7; k{1}.tolFun = 2.0e-7; % Optimization options
 k{1} = fitModel(k{1},model);
     
 % Simulate based on fitted parameters or manually set parameters
 k{1} = simulateModel(k{1},k{1}.paramEst,model);
+    
+% Second segment until last fitting index
+for i=2:rfi
+    % Initial state conditions for fitting
+    k{i}.y0 = zeros(1,numel(model.allStateName));
+    % initial value y0 for fitting states
+    for j=1:numel(model.fitStateName)
+        k{i}.y0(find(strcmp(model.allStateName, model.fitStateName(j)))) = k{i}.(model.fitStateName{j})(1);
+    end
+    % use initial fitting data from previous segment simulation
+    for j=1:numel(nonFitIndex)
+        k{i}.y0(nonFitIndex(j)) = k{i-1}.Yest(findIndexFromCell(k{i-1}.timeSim,datetime(k{i}.startDate)),nonFitIndex(j));
+    end
+    
+    % Fitting of the model to real data
+    k{i}.tolX = 2.0e-7; k{i}.tolFun = 2.0e-7; % Optimization options
+    k{i} = fitModel(k{i},model);
+    
+    % Simulate based on fitted parameters or manually set parameters
+    k{i} = simulateModel(k{i},k{i}.paramEst,model);
+end
 
 %% Comparison of the fitted and real data
 %MATLAB default colors:
@@ -220,26 +229,18 @@ global blueDef orangeDef yellowDef purpleDef greenDef lightblueDef brownDef
 
 % [EDITABLE] Property garis untuk plot state sistem, ubah sesuai jumlah state
 stateLineProp = cell(numel(model.allStateName),3);
-stateLineProp(find(strcmp(model.allStateName,'S')),:) = {blueDef,'-',2};
-stateLineProp(find(strcmp(model.allStateName,'Q')),:) = {'r','-',2};
-stateLineProp(find(strcmp(model.allStateName,'R')),:) = {greenDef,'-',2};
-stateLineProp(find(strcmp(model.allStateName,'D')),:) = {purpleDef,'-',2};
-stateLineProp(find(strcmp(model.allStateName,'Q_s')),:) = {'m','-.',1.5};
-stateLineProp(find(strcmp(model.allStateName,'R_s')),:) = {'g','-.',1.5};
-stateLineProp(find(strcmp(model.allStateName,'D_s')),:) = {brownDef,'-.',1.5};
+stateLineProp(1,:) = {blueDef,'-',1.5};
+stateLineProp(2,:) = {lightblueDef,'-',1.5};
+stateLineProp(3,:) = {brownDef,'-',1.5};
+stateLineProp(4,:) = {orangeDef,'-',1.5};
+stateLineProp(5,:) = {'m','-',1.5};
+stateLineProp(6,:) = {greenDef,'-',1.5};
+stateLineProp(7,:) = {'r','-',1.5};
+stateLineProp(8,:) = {purpleDef,'-',1.5};
 
 % Atur property plot kebijakan simulasi berbeda agar lebih mudah dilihat
 for i=1:numel(k)
     k{i}.stateLineProp = stateLineProp;
-    if(i==1 || i==1+1)
-        k{i}.stateLineProp(find(strcmp(model.allStateName,'S')),:) = {blueDef,'--',2};
-        k{i}.stateLineProp(find(strcmp(model.allStateName,'Q')),:) = {'r','--',2};
-        k{i}.stateLineProp(find(strcmp(model.allStateName,'R')),:) = {greenDef,'--',2};
-        k{i}.stateLineProp(find(strcmp(model.allStateName,'D')),:) = {purpleDef,'--',2};
-        k{i}.stateLineProp(find(strcmp(model.allStateName,'Q_s')),:) = {'m',':',1.5};
-        k{i}.stateLineProp(find(strcmp(model.allStateName,'R_s')),:) = {'g',':',1.5};
-        k{i}.stateLineProp(find(strcmp(model.allStateName,'D_s')),:) = {brownDef,':',1.5};
-    end
 end
 
 % [EDITABLE] Warna garis vertikal kebijakan, ubah sesuai jumlah kebijakan
@@ -247,22 +248,14 @@ k{1}.vlColor = 'g';
 % k{2}.vlColor = lightblueDef;
 % k{3}.vlColor = yellowDef;
 % k{4}.vlColor = 'b';
-% k{5}.vlColor = orangeDef;
-% k{6}.vlColor = 'k';
-% k{7}.vlColor = brownDef;
-% k{8}.vlColor = 'm';
 
 % [EDITABLE] Index untuk meletakkan cursor secara otomatis pada nilai maksimum figure
-cursorIndexMax{1}.kebijakan = 1; % indeks kebijakan tanpa lockdown yang akan diberi cursor
-cursorIndexMax{1}.stateName = {'Q','Q_s'}; % nama state yang akan diberi cursor
+cursorIndexMax{1}.kebijakan = rfi; % indeks kebijakan tanpa lockdown yang akan diberi cursor
+cursorIndexMax{1}.stateName = {'H'}; % nama state yang akan diberi cursor
 
 % garis batas kapasitas RS 
 if(exist('kapasitasRS'))
-    if(softwareName == 'matlab')
-        kapRS.x = [k{1}.timeSim{1} k{end}.timeSim{end}];
-    else
-        kapRS.x = [datenum(k{1}.timeSim{1}) datenum(k{end}.timeSim{end})];
-    end
+    kapRS.x = [datetime(k{1}.timeSim(1)) datetime(k{end}.timeSim(end))];
     kapRS.y = [kapasitasRS kapasitasRS];
     kapRS.title = ['Kapasitas RS: ' num2str(kapasitasRS)];
     kapRS.nameArray = {'Color','LineStyle','LineWidth'};
@@ -298,7 +291,7 @@ end
 title(['Simulasi State Fitting Saja dengan Model ' model.name ' Data Dummy']);
 
 % custom states
-customStates = {'Q','D','Q_s','D_s'}; % [EDITABLE] Ubah nama state sesuai yang ingin di-plot. Pisahkan dengan koma ','.
+customStates = {'H','D'}; % [EDITABLE] Ubah nama state sesuai yang ingin di-plot. Pisahkan dengan koma ','.
 hFigCustomStates = figure('units','normalized','outerposition',[0 0 1 1]);
 k = plotCustomStates(k,customStates,model, hFigCustomStates,cursorIndexMax); 
 k = plotVerticalLines(k);
