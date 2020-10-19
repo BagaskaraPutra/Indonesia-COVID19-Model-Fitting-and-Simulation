@@ -78,7 +78,7 @@ end
         
         %% Initial conditions
         N = numel(t);
-        options = odeset('RelTol', 1e-6, 'AbsTol', 1e-8, 'InitialStep', 0.01);
+        options = odeset('RelTol',1e-6, 'AbsTol',1e-8, 'InitialStep',0.01, 'NonNegative',1);
         [T,Y] = ode45(@fOde, tspan, kebijakan.y0, options, paramOde);
         fitIndex = [];
         for i=1:numel(model.fitStateName)

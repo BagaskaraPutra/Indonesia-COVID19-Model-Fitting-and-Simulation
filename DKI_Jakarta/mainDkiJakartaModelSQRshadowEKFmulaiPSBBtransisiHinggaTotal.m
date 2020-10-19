@@ -32,7 +32,7 @@ global Npop; Npop = 10770487; % DKI Jakarta total population
 k{1}.name = 'PSBB Masa Transisi'; %k{1}.startDate = '2020-07-07'; 
 k{1}.startDate = '2020-06-05'; k{1}.endDate = '2020-09-13'; k{1}.numDays = 14;
 k{2}.name = 'PSBB Total 14 September 2020';
-k{2}.startDate = '2020-09-14';
+k{2}.startDate = '2020-09-14'; k{2}.endDate = '2020-09-28';
 rfi = numel(k); % real fitting index: indeks kebijakan terakhir yang merupakan data fitting nyata
 
 lockdown.index = rfi+1;
@@ -94,7 +94,7 @@ keteranganSimulasi = ['EKFcustomQ=Qs_'...
 %% [EDITABLE] Lower bound of parameter for estimation constraint
 for i=1:numel(k) 
     k{i}.lbParam = zeros(1,size(model.paramName,2));
-    k{i}.lbParam(find(strcmp(model.paramName, 'beta_s'))) = 0.06;
+%     k{i}.lbParam(find(strcmp(model.paramName, 'beta_s'))) = 0.06;
 end
 % If you want to manually set parameter: 
 % k{1}.lbParam(find(strcmp(model.paramName, 'beta'))) = 0; OR k{1}.lbParam(1) = 0;

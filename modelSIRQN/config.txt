@@ -16,7 +16,7 @@ R
 D
 [paramName]:
 beta
-r_S_NQ 
+r_S_NQ
 r_NR_S
 r_NQ_NR
 r_NQ_Q

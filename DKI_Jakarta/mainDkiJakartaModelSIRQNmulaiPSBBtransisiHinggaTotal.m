@@ -33,9 +33,9 @@ global Npop; Npop = 10770487; % DKI Jakarta total population
 % k{1}.name = 'PSBB Masa Transisi Kurva Menurun'; 
 % k{1}.startDate = '2020-06-05'; k{1}.endDate = '2020-07-06'; k{1}.numDays = 14;
 k{1}.name = 'PSBB Masa Transisi'; %k{1}.startDate = '2020-07-07'; 
-k{1}.startDate = '2020-06-05'; k{1}.endDate = '2020-09-13'; k{1}.numDays = 14;
+k{1}.startDate = '2020-07-17'; k{1}.endDate = '2020-09-13'; k{1}.numDays = 14;
 k{2}.name = 'PSBB Total 14 September 2020';
-k{2}.startDate = '2020-09-14';
+k{2}.startDate = '2020-09-14'; k{2}.endDate = '2020-09-28';
 rfi = numel(k); % real fitting index: indeks kebijakan terakhir yang merupakan data fitting nyata
 
 lockdown.index = rfi+1;
@@ -46,7 +46,7 @@ lockdown.startDate = '2020-09-29';
 % lockdown.startDate = '2021-02-08'; 
 % lockdown.startDate = '2021-03-14'; 
 lockdown.numDays = 14; % durasi simulasi lockdown total
-postlockdown.numDays = 420; % durasi simulasi pasca lockdown
+postlockdown.numDays = 730; %420; % durasi simulasi pasca lockdown
 k{lockdown.index}.name = 'Simulasi Lockdown Total';
 k{lockdown.index}.startDate = lockdown.startDate; 
 k{lockdown.index}.endDate = lockdown.startDate; 
@@ -56,6 +56,9 @@ k{lockdown.index+1}.name = 'Simulasi Pelonggaran Lockdown Total';
 k{lockdown.index+1}.startDate = datestr(datenum(datetime(k{lockdown.index}.startDate)) + datenum(0,0,k{lockdown.index}.numDays)); %[Edited for Octave]
 k{lockdown.index+1}.endDate = k{lockdown.index+1}.startDate;
 k{lockdown.index+1}.numDays = postlockdown.numDays;
+
+k{lockdown.index+2}.name = 'Prediction Validation Data';
+k{lockdown.index+2}.startDate = '2020-09-29'; %k{lockdown.index+2}.endDate = '2020-10-04';
 
 % Inisialisasi semua state berdasarkan model.allStateName baik ada data fitting maupun tidak
 for i=1:numel(k)
@@ -88,6 +91,10 @@ end
 k{rfi}.numDays = datenum(k{lockdown.index}.timeFit{1}-k{rfi}.timeFit{end})+lockdown.numDays+postlockdown.numDays; 
 % supaya tanggal akhir simulasi tanpa lockdown = dengan lockdown
 
+% Move validation data to new struct and delete k(end)
+val = k{end};
+k(end) = [];
+
 % [EDITABLE] keterangan simulasi berdasarkan konfigurasi fitting & simulasi lockdown
 keteranganSimulasi = ['MulaiFit' datestr(k{1}.timeFit{1},'yyyy-mm-dd') ...
             'AkhirFit' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd') ...
@@ -97,12 +104,14 @@ keteranganSimulasi = ['MulaiFit' datestr(k{1}.timeFit{1},'yyyy-mm-dd') ...
 for i=1:numel(k) 
     k{i}.lbParam = zeros(1,size(model.paramName,2));
 end
+% k{1}.lbParam(find(strcmp(model.paramName,'r_S_NQ'))) = 5;
 % If you want to manually set parameter: 
 % k{1}.lbParam(find(strcmp(model.paramName, 'beta'))) = 0; OR k{1}.lbParam(1) = 0;
 
 %% [EDITABLE] Upper bound of parameter for estimation constraint
 for i=1:numel(k) 
     k{i}.ubParam = 1*ones(1,size(model.paramName,2));
+%     k{i}.ubParam(find(strcmp(model.paramName,'r_S_NQ'))) = 1e2;
 end
 % If you want to manually set parameter: 
 % k{1}.ubParam(find(strcmp(model.paramName, 'beta'))) = 1; OR k{1}.ubParam(1) = 1;
@@ -202,6 +211,9 @@ k{lockdown.index+1} = simulateModel(k{lockdown.index+1},k{lockdown.index+1}.para
 
 % Calculate reproduction number R0
 k = calcR0(k,model);
+
+% Calculate fitness using RMSE
+[fittingRMSE, predictionRMSE] = fitRMSE(k,val,model,rfi); %k{1}.startDate,k{rfi}.endDate);
 
 %% Comparison of the fitted and real data
 %MATLAB default colors:
@@ -326,6 +338,11 @@ printParam(k,model);
 saveDir = [mainDir '/results/' model.name '/' keteranganSimulasi '/param/'];
 mkdir(saveDir);
 saveParam(k,saveDir,model);
+
+% print and save RMSE
+saveDir = [mainDir '/results/' model.name '/' keteranganSimulasi '/RMSE/'];
+mkdir(saveDir);
+saveRMSE(fittingRMSE,predictionRMSE,saveDir,model);
 
 figure('units','normalized','outerposition',[0.25 0.25 0.4 0.2]);
 annotation('textbox',[0 0 1 1], 'FontSize',12, 'String', ...

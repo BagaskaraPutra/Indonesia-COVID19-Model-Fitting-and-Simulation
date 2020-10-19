@@ -43,6 +43,6 @@ else
 end
 N = numel(kebijakan.timeSim);
 t = [0:N-1].*dt;
-options = odeset('RelTol', 1e-6, 'AbsTol', 1e-8, 'InitialStep', 0.01);
+options = odeset('RelTol',1e-6, 'AbsTol',1e-8, 'InitialStep',0.01, 'NonNegative',1);
 cd(model.dir);
 [kebijakan.Test,kebijakan.Yest] = ode45(@fOde, t, kebijakan.y0, options, param);
