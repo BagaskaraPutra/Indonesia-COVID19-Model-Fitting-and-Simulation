@@ -1,23 +1,33 @@
 function model = loadModel(model)
-file = importdata([model.dir '/config.txt']);
-model.headerName = {'allStateName','fitStateName','paramName'}; 
-for i=1:numel(model.headerName)
-%     headerIndex{i} = find(contains(file,model.headerName{i})); %gak bisa di octave
-    tempIndex = strfind(file,model.headerName{i});
-    for j=1:numel(tempIndex)
-        if(~isempty(tempIndex{j}))
-            headerIndex{i} = j;
+file = importdata([model.dir '/config.txt']); %[EDITABLE] if you change the config file name
+headerStartChar = '['; headerEndChar = ']:'; %[EDITABLE] if you change the config header format
+
+headerIndex = {};
+tempIndex = strfind(file,headerEndChar);
+for hIdxFound=1:numel(tempIndex)
+    if(~isempty(tempIndex{hIdxFound}))
+        headerIndex = [headerIndex hIdxFound];
+	end
+end
+
+for hIdx=1:numel(headerIndex)
+    if(hIdx == numel(headerIndex)) % last headerName
+        for fIdx=1:size(file,1)-headerIndex{hIdx}
+            headerName = extractCharBetween(file{headerIndex{hIdx}},headerStartChar,headerEndChar);
+            model.(headerName){fIdx} = file{fIdx+headerIndex{hIdx}};
+        end
+    else % middle headerNames
+        for fIdx=1:(headerIndex{hIdx+1}-headerIndex{hIdx})-1
+            headerName = extractCharBetween(file{headerIndex{hIdx}},headerStartChar,headerEndChar);
+            model.(headerName){fIdx} = file{fIdx+headerIndex{hIdx}}; 
         end
     end
 end
-for i=1:numel(model.headerName)
-    if(i == numel(model.headerName))
-        for j=1:size(file,1)-headerIndex{i}
-            model.(model.headerName{i}){j} = file{j+headerIndex{i}};
-        end
-    else
-        for j=1:(headerIndex{i+1}-headerIndex{i})-1
-            model.(model.headerName{i}){j} = file{j+headerIndex{i}}; 
-        end
-    end
+
+function outputChar = extractCharBetween(inputChar,startChar,endChar)
+    startIdx = strfind(inputChar,startChar);
+    endIdx = strfind(inputChar,endChar);
+    outputChar = inputChar(startIdx+1:endIdx-1);
+end
+
 end
