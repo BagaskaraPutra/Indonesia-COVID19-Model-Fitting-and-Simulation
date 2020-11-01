@@ -1,0 +1,13 @@
+[param]:
+%paramName=[min, baseline, max]
+beta=[0, 0.5, 1]
+r_I_Q=[0, 0.5, 1]
+gamma=[0, 0.5, 1]
+muI=[0, 0.5, 1]
+
+[state]: %initial value
+S=1e7
+I=10
+Q=0
+R=0
+D=0

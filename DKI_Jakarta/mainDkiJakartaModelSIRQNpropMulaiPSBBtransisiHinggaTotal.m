@@ -34,8 +34,8 @@ global Npop; Npop = 10770487; % DKI Jakarta total population
 % k{1}.startDate = '2020-06-05'; k{1}.endDate = '2020-07-06'; k{1}.numDays = 14;
 k{1}.name = 'PSBB Masa Transisi'; %k{1}.startDate = '2020-07-07'; 
 k{1}.startDate = '2020-07-17'; k{1}.endDate = '2020-09-13'; k{1}.numDays = 14;
-k{2}.name = 'PSBB Total 14 September 2020'; k{2}.endDate = '2020-09-28';
-k{2}.startDate = '2020-09-14';
+k{2}.name = 'PSBB Total 14 September 2020'; 
+k{2}.startDate = '2020-09-14'; k{2}.endDate = '2020-10-11'; %k{2}.endDate = '2020-09-28';
 rfi = numel(k); % real fitting index: indeks kebijakan terakhir yang merupakan data fitting nyata
 
 lockdown.index = rfi+1;
