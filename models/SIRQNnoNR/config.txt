@@ -1,3 +1,5 @@
+[name]:
+SIRQNnoNR
 [allStateName]:
 S
 NQ

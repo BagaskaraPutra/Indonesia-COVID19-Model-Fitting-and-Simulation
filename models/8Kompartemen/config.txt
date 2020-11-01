@@ -1,3 +1,5 @@
+[name]:
+8Kompartemen
 [allStateName]:
 Sq
 S

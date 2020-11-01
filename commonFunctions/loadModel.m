@@ -29,6 +29,9 @@ for hIdx=1:numel(headerIndex)
             model.(headerName){fIdx} = focusedHeaderFile{fIdx};
         end
     end
+    if(numel(model.(headerName)) == 1)
+        model.(headerName) = model.(headerName){1};
+    end
 end
 
 end

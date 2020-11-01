@@ -26,7 +26,6 @@ end
 
 % [EDITABLE] Jika ingin mengubah model, state fiting, dan parameter; edit variable2 di bawah ini:
 namaDaerah = 'Surabaya';
-model.name = 'SIR(modified)';
 model.dir = ['../models/SIR(modified)'];
 model = loadModel(model); cd(mainDir);
 global Npop; Npop = 3158943; % Surabaya total population
