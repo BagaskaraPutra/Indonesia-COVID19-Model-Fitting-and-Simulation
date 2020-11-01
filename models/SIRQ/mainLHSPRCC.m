@@ -9,7 +9,7 @@ analyzeThisOutput = 'I'; % Chosen output variable name to do PRCC analysis
 
 model.name = 'SIRQ';
 model.dir = ['modelSIRQ']; %directory of ODE model and config
-model = loadModel(model);
+model = loadModel(model); cd(mainDir);
 model = loadPRCCconfig(model,[model.dir '/PRCCconfig.txt']); %contains config for PRCC min,baseline,max,initial
 
 % Parameter Labels 

@@ -22,7 +22,7 @@ end
 namaDaerah = 'DKI Jakarta';
 model.name = 'SQRshadow';
 model.dir = ['../models/SQRshadow'];
-model = loadModel(model);
+model = loadModel(model); cd(mainDir);
 global Npop; Npop = 10770487; % DKI Jakarta total population
 % kapasitasRS = 12150; % dari kapasitas RS 70% pada 28 Agustus 2020
 
@@ -30,8 +30,8 @@ global Npop; Npop = 10770487; % DKI Jakarta total population
 % ubah startDate & endDate sesuai kebijakan. Jika tidak tahu endDate, tidak usah diisi, data terakhir yang diambil.
 % numDays = berapa hari akan disimulasikan setelah hari terakhir kebijakan?
 % k{1}.name = 'PSBB Masa Transisi';
-k{1}.name = 'PSBB Dummy'; 
-k{1}.startDate = '2020-06-05'; k{1}.endDate = '2020-09-28'; k{1}.numDays = 730;
+k{1}.name = 'Data Dummy'; 
+k{1}.startDate = '2020-06-05'; k{1}.endDate = '2020-09-28'; k{1}.numDays = 100; %730;
 %k{1}.endDate = '2020-09-13'; k{1}.numDays = 14;
 % k{2}.name = 'PSBB Total 14 September 2020';
 % k{2}.startDate = '2020-09-14'; k{2}.endDate = '2020-09-28'; k{2}.numDays = 730;

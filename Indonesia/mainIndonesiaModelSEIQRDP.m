@@ -36,7 +36,7 @@ end
 namaDaerah = 'Indonesia';
 model.name = 'SEIQRDP';
 model.dir = ['../models/SEIQRDP'];
-model = loadModel(model);
+model = loadModel(model); cd(mainDir);
 global Npop; Npop = 273.52e6; % Indonesia total population
 % kapasitasRS = ; % kapasitas Rumah Sakit
 

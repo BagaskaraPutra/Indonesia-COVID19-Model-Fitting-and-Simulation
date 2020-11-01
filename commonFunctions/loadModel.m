@@ -1,5 +1,7 @@
 function model = loadModel(model)
 file = importdata([model.dir '/config.txt']); %[EDITABLE] if you change the config file name
+cd(model.dir)
+model.dir = pwd;
 ignoreChar = '%'; %[EDITABLE] if you change the ignore or comment header type
 headerStartChar = '['; headerEndChar = ']:'; %[EDITABLE] if you change the config header format
 

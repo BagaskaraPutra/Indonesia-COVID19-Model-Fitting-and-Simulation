@@ -23,7 +23,7 @@ end
 namaDaerah = 'DKI Jakarta';
 model.name = '8Kompartemen';
 model.dir = ['../models/8Kompartemen'];
-model = loadModel(model);
+model = loadModel(model); cd(mainDir);
 global Npop; Npop = 10770487; % DKI Jakarta total population
 % kapasitasRS = 12150; % dari kapasitas RS 70% pada 31 Agustus
 

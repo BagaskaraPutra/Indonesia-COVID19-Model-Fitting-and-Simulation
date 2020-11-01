@@ -28,7 +28,7 @@ end
 namaDaerah = 'DKI Jakarta';
 model.name = 'SIR(modified)';
 model.dir = ['../models/SIR(modified)'];
-model = loadModel(model);
+model = loadModel(model); cd(mainDir);
 global Npop; Npop = 10770487; % DKI Jakarta total population
 % kapasitasRS = 12150; % dari kapasitas RS 70% pada 28 Agustus 2020
 

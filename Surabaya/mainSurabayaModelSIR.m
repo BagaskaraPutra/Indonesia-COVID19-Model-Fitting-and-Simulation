@@ -28,7 +28,7 @@ end
 namaDaerah = 'Surabaya';
 model.name = 'SIR(modified)';
 model.dir = ['../models/SIR(modified)'];
-model = loadModel(model);
+model = loadModel(model); cd(mainDir);
 global Npop; Npop = 3158943; % Surabaya total population
 % kapasitasRS = 
 
