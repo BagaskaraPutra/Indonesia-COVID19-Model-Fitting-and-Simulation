@@ -21,9 +21,8 @@ end
 
 % [EDITABLE] Jika ingin mengubah model, state fiting, dan parameter; edit variable2 di bawah ini:
 namaDaerah = 'DKI Jakarta';
-model.name = '8Kompartemen';
-model.dir = ['../model8Kompartemen'];
-model = loadModel(model);
+model.dir = ['../models/8Kompartemen'];
+model = loadModel(model); cd(mainDir);
 global Npop; Npop = 10770487; % DKI Jakarta total population
 % kapasitasRS = 12150; % dari kapasitas RS 70% pada 31 Agustus
 

@@ -34,9 +34,8 @@ end
 
 % [EDITABLE] Jika ingin mengubah model, state fiting, dan parameter; edit variable2 di bawah ini:
 namaDaerah = 'Indonesia';
-model.name = 'SEIQRDP';
-model.dir = ['../modelSEIQRDP'];
-model = loadModel(model);
+model.dir = ['../models/SEIQRDP'];
+model = loadModel(model); cd(mainDir);
 global Npop; Npop = 273.52e6; % Indonesia total population
 % kapasitasRS = ; % kapasitas Rumah Sakit
 

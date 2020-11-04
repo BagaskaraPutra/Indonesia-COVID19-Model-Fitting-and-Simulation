@@ -21,9 +21,8 @@ end
 
 % [EDITABLE] Jika ingin mengubah model, state fiting, dan parameter; edit variable2 di bawah ini:
 namaDaerah = 'DKI Jakarta';
-model.name = 'SIRQ';
-model.dir = ['../modelSIRQ'];
-model = loadModel(model);
+model.dir = ['../models/SIRQ'];
+model = loadModel(model); cd(mainDir);
 global Npop; Npop = 10770487; % DKI Jakarta total population
 % kapasitasRS = 12150; % dari kapasitas RS 70% pada 28 Agustus 2020
 
