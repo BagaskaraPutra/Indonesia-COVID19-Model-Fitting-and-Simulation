@@ -1,4 +1,4 @@
-function dydt=TBmodel(model,t,y,LHSmatrix,x)
+function dydt=ODE_LHS(model,t,y,LHSmatrix,x)
 dydt = zeros(numel(model.allStateName),1);
 %% PARAMETERS %%
 Npop = 0;

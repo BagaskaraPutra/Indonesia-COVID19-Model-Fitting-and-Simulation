@@ -1,21 +1,21 @@
 %% LHS-PRCC US analysis for SIRQ model
-clear all; close all;
-addpath('../commonFunctions');
-addpath('../commonFunctions/LHS-PRCC');
+clear all; close all; mainDir = pwd;
+addpath('../../commonFunctions');
+addpath('../../commonFunctions/LHS-PRCC');
 %% [EDITABLE] Sample size N
-runs=100;
+runs=500; %100;
 %% [EDITABLE] Load Model Parameters and Variables
 analyzeThisOutput = 'I'; % Chosen output variable name to do PRCC analysis
-
-model.dir = ['modelSIRQ']; %directory of ODE model and config
+alpha = 0.05; %threshold for significant PRCCs (uncorrelated < alpha)
+model.dir = pwd; %directory of ODE model and config
 model = loadModel(model); cd(mainDir);
 model = loadPRCCconfig(model,[model.dir '/PRCCconfig.txt']); %contains config for PRCC min,baseline,max,initial
 
 % Parameter Labels 
-PRCC_var=model.paramName; %{'s', '\mu_T', 'r', 'k_1','k_2', '\mu_b','N_V', '\mu_V','dummy'};
+PRCC_var=model.paramLabel;
 
 % Variable Labels
-y_var_label=model.allStateName; %{'T','T*','T**','V'};
+y_var_label=model.allStateName;
 
 %% [EDITABLE] TIME SPAN OF THE SIMULATION
 t_end=4000; % length of the simulations
@@ -55,9 +55,7 @@ for x=1:runs %Run solution x times choosing different values
     end
 end
 %% Save the workspace
-save Model_LHS.mat;
 % CALCULATE PRCC
-alpha = 0.01; %0.05; %threshold for significant PRCCs (uncorrelated < alpha)
 [prcc sign sign_label]=PRCC(LHSmatrix,model.state.(analyzeThisOutput).lhs,1:length(time_points),PRCC_var,alpha);
 % https://www.mathworks.com/matlabcentral/answers/376781-too-many-input-arguments-error
 
@@ -79,3 +77,5 @@ end
 
 % PRCC_PLOT(X,Y,s,PRCC_var,y_var)
 PRCC_PLOT(LHSmatrix,model.state.(analyzeThisOutput).lhs,length(time_points),PRCC_var,y_var_label)
+
+save mainLHSPRCC.mat;

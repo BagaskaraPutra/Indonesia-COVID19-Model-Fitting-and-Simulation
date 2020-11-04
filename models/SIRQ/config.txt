@@ -15,3 +15,8 @@ beta
 r_I_Q
 gamma
 muI
+[paramLabel]:
+\beta
+r_{I,Q}
+\gamma
+\mu_I
