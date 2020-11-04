@@ -11,10 +11,5 @@ pkg install -forge io
 pkg install -forge statistics
 pkg install -forge struct
 ```
-## To Do:
-**[ONGOING]** For lockdown simulation segments, always specify endDate to prevent unwanted fitting.\
-**[SOLVED]** **PROBLEM:** Octave underfits models containing more than 2 compartments with no real world fitting data (SEIQRDP, SIRQN).\
-**SOLUTION:** Load previously fitted parameters from Matlab for the initial guess when fitting using Octave. 
-
 ## Software Architecture
 ![Image of Software Architecture](https://github.com/BagaskaraPutra/Indonesia-COVID19-Model-Fitting-and-Simulation/blob/master/ArsitekturProgram.png)
