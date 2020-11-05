@@ -2,8 +2,9 @@
 % Semua yang ada komentar [EDITABLE] dapat diprioritaskan untuk diedit jika
 % ada perubahan model, parameter model, parameter plotting, kebijakan, dll.
 % Compartments: 
-
-%By: Bagaskara P.P., Last Modified: 2020-10-07
+% S: Susceptible % NQ: Nonpositive Quarantined % ND: Nonpositive Deaths
+% I: Infectious % Q: Quarantined % R: Recovered % D: Deaths
+%By: Bagaskara P.P., Last Modified: 2020-11-05
 
 clear all; close all; clc; 
 mainDir = pwd; % get current main directory 
@@ -15,13 +16,12 @@ if(softwareAcronym == 'm' || softwareAcronym == 'M')
     softwareName = 'matlab';
 else
     softwareName = 'octave';
-    pkg load io;
-    pkg load optim;
+    pkg load io; pkg load optim;
 end
 
 % [EDITABLE] Jika ingin mengubah model, state fiting, dan parameter; edit variable2 di bawah ini:
 namaDaerah = 'DKI Jakarta';
-model.dir = ['../models/SIRQNnoNR'];
+model.dir = ['../models/SIRQN'];
 model = loadModel(model); cd(mainDir);
 global Npop; Npop = 10770487; % DKI Jakarta total population
 % kapasitasRS = 12150; % dari kapasitas RS 70% pada 28 Agustus 2020
@@ -34,30 +34,29 @@ global Npop; Npop = 10770487; % DKI Jakarta total population
 k{1}.name = 'PSBB Masa Transisi'; %k{1}.startDate = '2020-07-07'; 
 k{1}.startDate = '2020-07-17'; k{1}.endDate = '2020-09-13'; k{1}.numDays = 14;
 k{2}.name = 'PSBB Total 14 September 2020';
-k{2}.startDate = '2020-09-14'; k{2}.endDate = '2020-09-28';
+k{2}.startDate = '2020-09-14'; k{2}.endDate = '2020-09-28'; k{2}.numDays = 730;
 rfi = numel(k); % real fitting index: indeks kebijakan terakhir yang merupakan data fitting nyata
 
-lockdown.index = rfi+1;
-% lockdown.startDate = '2020-07-27';
-lockdown.startDate = '2020-09-29'; 
-% lockdown.startDate = '2020-11-24'; 
-% lockdown.startDate = '2020-12-25'; 
-% lockdown.startDate = '2021-02-08'; 
-% lockdown.startDate = '2021-03-14'; 
-lockdown.numDays = 14; % durasi simulasi lockdown total
-postlockdown.numDays = 730; %420; % durasi simulasi pasca lockdown
-k{lockdown.index}.name = 'Simulasi Lockdown Total';
-k{lockdown.index}.startDate = lockdown.startDate; 
-k{lockdown.index}.endDate = lockdown.startDate; 
-k{lockdown.index}.numDays = lockdown.numDays;
-
-k{lockdown.index+1}.name = 'Simulasi Pelonggaran Lockdown Total';
-k{lockdown.index+1}.startDate = datestr(datenum(datetime(k{lockdown.index}.startDate)) + datenum(0,0,k{lockdown.index}.numDays)); %[Edited for Octave]
-k{lockdown.index+1}.endDate = k{lockdown.index+1}.startDate;
-k{lockdown.index+1}.numDays = postlockdown.numDays;
-
-k{lockdown.index+2}.name = 'Prediction Validation Data';
-k{lockdown.index+2}.startDate = '2020-09-29'; %k{lockdown.index+2}.endDate = '2020-10-04';
+% [EDITABLE] Comment lockdown & postlockdown if you do not want to simulate lockdown
+% lockdown.index = rfi+1;
+% lockdown.startDate = '2020-09-29'; 
+% lockdown.numDays = 14; % durasi simulasi lockdown total
+% postlockdown.numDays = 730; %420; % durasi simulasi pasca lockdown
+if(exist('lockdown'))
+    k{lockdown.index}.name = 'Simulasi Lockdown Total';
+    k{lockdown.index}.startDate = lockdown.startDate; 
+    k{lockdown.index}.endDate = lockdown.startDate; 
+    k{lockdown.index}.numDays = lockdown.numDays;
+end
+if(exist('postlockdown'))
+    k{lockdown.index+1}.name = 'Simulasi Pelonggaran Lockdown Total';
+    k{lockdown.index+1}.startDate = datestr(datenum(datetime(k{lockdown.index}.startDate)) + datenum(0,0,k{lockdown.index}.numDays)); %[Edited for Octave]
+    k{lockdown.index+1}.endDate = k{lockdown.index+1}.startDate;
+    k{lockdown.index+1}.numDays = postlockdown.numDays;
+end
+currentLastSim = numel(k);
+k{currentLastSim+1}.name = 'Prediction Validation Data';
+k{currentLastSim+1}.startDate = '2020-09-29'; k{currentLastSim+1}.endDate = '2020-10-06';
 
 % Inisialisasi semua state berdasarkan model.allStateName baik ada data fitting maupun tidak
 for i=1:numel(k)
@@ -87,30 +86,32 @@ for i=1:numel(k)
     k{i} = getDataKebijakanFromDate(k{i},gabung,model);
 end
 
-k{rfi}.numDays = datenum(k{lockdown.index}.timeFit{1}-k{rfi}.timeFit{end})+lockdown.numDays+postlockdown.numDays; 
+if(exist('lockdown'))
+    k{rfi}.numDays = datenum(k{lockdown.index}.timeFit{1}-k{rfi}.timeFit{end})+lockdown.numDays+postlockdown.numDays; 
 % supaya tanggal akhir simulasi tanpa lockdown = dengan lockdown
+end
 
 % Move validation data to new struct and delete k(end)
-val = k{end};
-k(end) = [];
+val = k{end}; k(end) = [];
 
 % [EDITABLE] keterangan simulasi berdasarkan konfigurasi fitting & simulasi lockdown
-keteranganSimulasi = ['MulaiFit' datestr(k{1}.timeFit{1},'yyyy-mm-dd') ...
-            'AkhirFit' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd') ...
-          'Lockdown' lockdown.startDate 'Durasi' num2str(lockdown.numDays)];
+keteranganSimulasi = ['StartFit' datestr(k{1}.timeFit{1},'yyyy-mm-dd') ...
+                    'EndFit' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd')];
+if(exist('lockdown'))
+   keteranganSimulasi = [keteranganSimulasi ...
+                        'Lockdown' lockdown.startDate 'Duration' num2str(lockdown.numDays)];
+end
       
 %% [EDITABLE] Lower bound of parameter for estimation constraint
 for i=1:numel(k) 
     k{i}.lbParam = zeros(1,size(model.paramName,2));
 end
-% k{1}.lbParam(find(strcmp(model.paramName,'r_S_NQ'))) = 5;
 % If you want to manually set parameter: 
 % k{1}.lbParam(find(strcmp(model.paramName, 'beta'))) = 0; OR k{1}.lbParam(1) = 0;
 
 %% [EDITABLE] Upper bound of parameter for estimation constraint
 for i=1:numel(k) 
     k{i}.ubParam = 1*ones(1,size(model.paramName,2));
-%     k{i}.ubParam(find(strcmp(model.paramName,'r_S_NQ'))) = 1e2;
 end
 % If you want to manually set parameter: 
 % k{1}.ubParam(find(strcmp(model.paramName, 'beta'))) = 1; OR k{1}.ubParam(1) = 1;
@@ -180,33 +181,35 @@ end
 
 %% Simulate based on fitted parameters or manually set parameters
 
-% [EDITABLE] Simulasi Kebijakan Lockdown Total
-k{lockdown.index}.y0 = zeros(1,numel(model.allStateName));
-if(datenum(k{lockdown.index}.startDate) > datenum(k{rfi}.timeFit{end})) % jika tanggal lockdown melebihi tanggal akhir fitting
-% nilai awal kebijakan lockdown = nilai dari data simulasi kebijakan sebelumnya pada tanggal tsb.
-    for i=1:numel(model.fitStateName)
-        k{lockdown.index}.y0(find(strcmp(model.allStateName, model.fitStateName{i}))) = k{rfi}.Yest((findIndexFromCell(k{rfi}.timeSim,datetime(k{lockdown.index}.startDate))),find(strcmp(model.allStateName, model.fitStateName{i})));
+if(exist('lockdown'))
+    % [EDITABLE] Simulasi Kebijakan Lockdown Total
+    k{lockdown.index}.y0 = zeros(1,numel(model.allStateName));
+    if(datenum(k{lockdown.index}.startDate) > datenum(k{rfi}.timeFit{end})) % jika tanggal lockdown melebihi tanggal akhir fitting
+    % nilai awal kebijakan lockdown = nilai dari data simulasi kebijakan sebelumnya pada tanggal tsb.
+        for i=1:numel(model.fitStateName)
+            k{lockdown.index}.y0(find(strcmp(model.allStateName, model.fitStateName{i}))) = k{rfi}.Yest((findIndexFromCell(k{rfi}.timeSim,datetime(k{lockdown.index}.startDate))),find(strcmp(model.allStateName, model.fitStateName{i})));
+        end
+    else
+    % nilai awal kebijakan lockdown = nilai dari data riil kebijakan sebelumnya pada tanggal tsb.
+        for i=1:numel(model.fitStateName)
+            k{lockdown.index}.y0(find(strcmp(model.allStateName, model.fitStateName{i}))) = k{rfi}.(model.fitStateName{i})(findIndexFromCell(k{rfi}.timeFit,datetime(k{lockdown.index}.startDate)));
+        end
     end
-else
-% nilai awal kebijakan lockdown = nilai dari data riil kebijakan sebelumnya pada tanggal tsb.
-    for i=1:numel(model.fitStateName)
-        k{lockdown.index}.y0(find(strcmp(model.allStateName, model.fitStateName{i}))) = k{rfi}.(model.fitStateName{i})(findIndexFromCell(k{rfi}.timeFit,datetime(k{lockdown.index}.startDate)));
+    % use initial fitting data from previous segment simulation
+    for j=1:numel(nonFitIndex)
+        k{lockdown.index}.y0(nonFitIndex(j)) = k{lockdown.index-1}.Yest(findIndexFromCell(k{lockdown.index-1}.timeSim,datetime(k{lockdown.index}.startDate)),nonFitIndex(j));
     end
-end
-% use initial fitting data from previous segment simulation
-for j=1:numel(nonFitIndex)
-    k{lockdown.index}.y0(nonFitIndex(j)) = k{lockdown.index-1}.Yest(findIndexFromCell(k{lockdown.index-1}.timeSim,datetime(k{lockdown.index}.startDate)),nonFitIndex(j));
-end
-k{lockdown.index}.paramEst = k{rfi}.paramEst; % set parameter sama seperti kebijakan sebelumnya,
-k{lockdown.index}.paramEst(find(strcmp(model.paramName, 'beta'))) = 0; % namun nilai beta di-set nol
-k{lockdown.index}.paramEst(find(strcmp(model.paramName, 'r_S_NQ'))) = 0; % namun nilai r_S_NQ di-set nol
-k{lockdown.index} = simulateModel(k{lockdown.index},k{lockdown.index}.paramEst,model);
+    k{lockdown.index}.paramEst = k{rfi}.paramEst; % set parameter sama seperti kebijakan sebelumnya,
+    k{lockdown.index}.paramEst(find(strcmp(model.paramName, 'beta'))) = 0; % namun nilai beta di-set nol
+    k{lockdown.index}.paramEst(find(strcmp(model.paramName, 'r_S_NQ'))) = 0; % namun nilai r_S_NQ di-set nol
+    k{lockdown.index} = simulateModel(k{lockdown.index},k{lockdown.index}.paramEst,model);
 
-% [EDITABLE] Simulasi Kebijakan Pelonggaran Lockdown Total
-k{lockdown.index+1}.y0 = zeros(1,numel(model.allStateName));
-k{lockdown.index+1}.y0 = k{lockdown.index}.Yest(findIndexFromCell(k{lockdown.index}.timeSim,datetime(k{lockdown.index+1}.startDate)),:); %ambil data dari k{n-1}.Yest pada tanggal k{n}.startDate
-k{lockdown.index+1}.paramEst = k{rfi}.paramEst; % set parameter sama seperti kebijakan sebelum lockdown,
-k{lockdown.index+1} = simulateModel(k{lockdown.index+1},k{lockdown.index+1}.paramEst,model);
+    % [EDITABLE] Simulasi Kebijakan Pelonggaran Lockdown Total
+    k{lockdown.index+1}.y0 = zeros(1,numel(model.allStateName));
+    k{lockdown.index+1}.y0 = k{lockdown.index}.Yest(findIndexFromCell(k{lockdown.index}.timeSim,datetime(k{lockdown.index+1}.startDate)),:); %ambil data dari k{n-1}.Yest pada tanggal k{n}.startDate
+    k{lockdown.index+1}.paramEst = k{rfi}.paramEst; % set parameter sama seperti kebijakan sebelum lockdown,
+    k{lockdown.index+1} = simulateModel(k{lockdown.index+1},k{lockdown.index+1}.paramEst,model);
+end
 
 % Calculate reproduction number R0
 k = calcR0(k,model);
@@ -232,15 +235,17 @@ stateLineProp(find(strcmp(model.allStateName,'D')),:) = {'r','-',1.5};
 % Atur property plot kebijakan simulasi berbeda agar lebih mudah dilihat
 for i=1:numel(k)
     k{i}.stateLineProp = stateLineProp;
-    if(i==lockdown.index || i==lockdown.index+1)
-        k{i}.stateLineProp = cell(numel(model.allStateName),3);
-        k{i}.stateLineProp(find(strcmp(model.allStateName,'S')),:) = {blueDef,'--',1.5};
-        k{i}.stateLineProp(find(strcmp(model.allStateName,'NQ')),:) = {yellowDef,'--',1.5};
-        k{i}.stateLineProp(find(strcmp(model.allStateName,'ND')),:) = {brownDef,'--',1.5};
-        k{i}.stateLineProp(find(strcmp(model.allStateName,'I')),:) = {[0.5 0.5 0.5],'--',1.5};
-        k{i}.stateLineProp(find(strcmp(model.allStateName,'Q')),:) = {'m','--',1.5};
-        k{i}.stateLineProp(find(strcmp(model.allStateName,'R')),:) = {greenDef,'--',1.5};
-        k{i}.stateLineProp(find(strcmp(model.allStateName,'D')),:) = {'r','--',1.5};
+    if(exist('lockdown'))
+        if((i==lockdown.index || i==lockdown.index+1))
+            k{i}.stateLineProp = cell(numel(model.allStateName),3);
+            k{i}.stateLineProp(find(strcmp(model.allStateName,'S')),:) = {blueDef,'--',1.5};
+            k{i}.stateLineProp(find(strcmp(model.allStateName,'NQ')),:) = {yellowDef,'--',1.5};
+            k{i}.stateLineProp(find(strcmp(model.allStateName,'ND')),:) = {brownDef,'--',1.5};
+            k{i}.stateLineProp(find(strcmp(model.allStateName,'I')),:) = {[0.5 0.5 0.5],'--',1.5};
+            k{i}.stateLineProp(find(strcmp(model.allStateName,'Q')),:) = {'m','--',1.5};
+            k{i}.stateLineProp(find(strcmp(model.allStateName,'R')),:) = {greenDef,'--',1.5};
+            k{i}.stateLineProp(find(strcmp(model.allStateName,'D')),:) = {'r','--',1.5};
+        end
     end
 end
 
@@ -249,16 +254,25 @@ k{1}.vlColor = 'g';
 k{2}.vlColor = lightblueDef;
 k{3}.vlColor = yellowDef;
 k{4}.vlColor = 'b';
-% k{5}.vlColor = orangeDef;
-% k{6}.vlColor = 'k';
-% k{7}.vlColor = brownDef;
-% k{8}.vlColor = 'm';
+k{5}.vlColor = orangeDef;
+k{6}.vlColor = 'k';
+k{7}.vlColor = brownDef;
+k{8}.vlColor = 'm';
+for i=1:numel(k)
+    if(~isfield(k{i},'Test'))
+        fprintf('%d: No simulation content',i);
+        k = k(1:i-1);
+        break;
+    end
+end
 
 % [EDITABLE] Index untuk meletakkan cursor secara otomatis pada nilai maksimum figure
 cursorIndexMax{1}.kebijakan = rfi; % indeks kebijakan tanpa lockdown yang akan diberi cursor
 cursorIndexMax{1}.stateName = {'I','Q'}; % nama state yang akan diberi cursor
-cursorIndexMax{2}.kebijakan = lockdown.index+1; % indeks kebijakan pasca-lockdown yang akan diberi cursor
-cursorIndexMax{2}.stateName = {'I','Q'}; % nama state yang akan diberi cursor
+if(exist('lockdown'))
+    cursorIndexMax{2}.kebijakan = lockdown.index+1; % indeks kebijakan pasca-lockdown yang akan diberi cursor
+    cursorIndexMax{2}.stateName = {'I','Q'}; % nama state yang akan diberi cursor
+end
 
 % garis batas kapasitas RS 
 if(exist('kapasitasRS'))
@@ -284,8 +298,9 @@ if(exist('kapasitasRS'))
 else
     plotLegend(k);
 end
-printLockdownDetails(lockdown);
-title(['Fitting & Simulasi Semua State dengan Model ' model.name ' untuk ' namaDaerah ' per Kebijakan']);
+if(exist('lockdown')) printLockdownDetails(lockdown); end
+% title(['Fitting & Simulasi Semua State dengan Model ' model.name ' untuk ' namaDaerah ' per Kebijakan']);
+title(['Fitting & Simulation of All Compartments with ' model.name ' Model on ' namaDaerah]);
 
 % fitting states only
 hFigFittingStates = figure('units','normalized','outerposition',[0 0 1 1]);
@@ -298,8 +313,9 @@ if(exist('kapasitasRS'))
 else
     plotLegend(k);
 end
-printLockdownDetails(lockdown);
-title(['Fitting & Simulasi State Fitting Saja dengan Model ' model.name ' untuk ' namaDaerah ' per Kebijakan']);
+if(exist('lockdown')) printLockdownDetails(lockdown); end
+% title(['Fitting & Simulasi State Fitting Saja dengan Model ' model.name ' untuk ' namaDaerah ' per Kebijakan']);
+title(['Fitting & Simulation of Fitting Compartments Only with ' model.name ' Model on ' namaDaerah]);
 
 % custom states
 customStates = {'I','Q','D'}; % [EDITABLE] Ubah nama state sesuai yang ingin di-plot. Pisahkan dengan koma ','.
@@ -313,12 +329,13 @@ if(exist('kapasitasRS'))
 else
     plotLegend(k);
 end
-printLockdownDetails(lockdown);
+if(exist('lockdown')) printLockdownDetails(lockdown); end
 stringCustom = [];
 for i=1:numel(customStates)
     stringCustom = [stringCustom ' ' customStates{i}];
 end
-title(['Fitting & Simulasi State ' stringCustom ' dengan model ' model.name ' untuk ' namaDaerah ' per Kebijakan']);
+% title(['Fitting & Simulasi State ' stringCustom ' dengan model ' model.name ' untuk ' namaDaerah ' per Kebijakan']);
+title(['Fitting & Simulation of ' stringCustom ' Compartments with ' model.name ' Model on ' namaDaerah]);
 
 % save peak info
 saveDir = [mainDir '/results/' model.name '/' keteranganSimulasi '/peakInfo/'];
