@@ -218,9 +218,7 @@ k = calcR0(k,model);
 [fittingRMSE, predictionRMSE] = fitRMSE(k,val,model,rfi); %k{1}.startDate,k{rfi}.endDate);
 
 %% Comparison of the fitted and real data
-fullscreen = [0 0 1 1]; figureSize = [0 0 0.69 0.8787]; % custom figure size
-% figureSize = fullscreen; %Uncomment to make fullscreen figure
-
+figureSize = 'small'; %'fullscreen'; 
 %MATLAB default colors:
 loadDefaultColors();
 global blueDef orangeDef yellowDef purpleDef greenDef lightblueDef brownDef
@@ -290,7 +288,8 @@ if(exist('kapasitasRS'))
 end
 
 % all states
-hFigAllStates = figure('units','normalized','outerposition',figureSize);
+% hFigAllStates = figure('units','normalized','outerposition',[0 0 1 1]); % otomatis full screen
+hFigAllStates = figure('units','normalized','outerposition',[0 0 0.67 0.8787]);
 k = plotAllStates(k,model, hFigAllStates,cursorIndexMax);
 k = plotVerticalLines(k);
 if(exist('kapasitasRS'))
@@ -305,7 +304,8 @@ if(exist('lockdown')) printLockdownDetails(lockdown); end
 title(['Fitting & Simulation of All Compartments with ' model.name ' Model on ' namaDaerah]);
 
 % fitting states only
-hFigFittingStates = figure('units','normalized','outerposition',figureSize);
+% hFigFittingStates = figure('units','normalized','outerposition',[0 0 1 1]);
+hFigFittingStates = figure('units','normalized','outerposition',[0 0 0.67 0.8787]);
 k = plotFittingStates(k,model, hFigFittingStates,cursorIndexMax);
 k = plotVerticalLines(k);
 if(exist('kapasitasRS'))
@@ -321,7 +321,8 @@ title(['Fitting & Simulation of Fitting Compartments Only with ' model.name ' Mo
 
 % custom states
 customStates = {'ND','I','Q','D'}; % [EDITABLE] Ubah nama state sesuai yang ingin di-plot. Pisahkan dengan koma ','.
-hFigCustomStates = figure('units','normalized','outerposition',figureSize);
+% hFigCustomStates = figure('units','normalized','outerposition',[0 0 1 1]);
+hFigCustomStates = figure('units','normalized','outerposition',[0 0 0.67 0.8787]);
 k = plotCustomStates(k,customStates,model, hFigCustomStates,cursorIndexMax); 
 k = plotVerticalLines(k);
 if(exist('kapasitasRS'))
@@ -374,7 +375,7 @@ else
 end
 saveGraph = input(prompt, 's');
 if(saveGraph == 'Y' || saveGraph == 'y')
-    if(figureSize == fullscreen)
+    if(figureSize == 'fullscreen')
         saveas(hFigAllStates,[saveDir '/AllStates.fig']);
         saveas(hFigAllStates,[saveDir '/AllStates.png']);
         saveas(hFigFittingStates,[saveDir '/FittingStates.fig']);
@@ -382,13 +383,12 @@ if(saveGraph == 'Y' || saveGraph == 'y')
         saveas(hFigCustomStates,[saveDir '/CustomStates.fig']);
         saveas(hFigCustomStates,[saveDir '/CustomStates.png']);
     else
-        saveas(hFigAllStates,[saveDir '/AllStatesCustomSize.fig']);
-        saveas(hFigAllStates,[saveDir '/AllStatesCustomSize.png']);
-        saveas(hFigFittingStates,[saveDir '/FittingStatesCustomSize.fig']);
-        saveas(hFigFittingStates,[saveDir '/FittingStatesCustomSize.png']);
-        saveas(hFigCustomStates,[saveDir '/CustomStatesCustomSize.fig']);
-        saveas(hFigCustomStates,[saveDir '/CustomStatesCustomSize.png']);
-    end
+saveas(hFigAllStates,[saveDir '/AllStatesSmall.fig']);
+saveas(hFigAllStates,[saveDir '/AllStatesSmall.png']);
+saveas(hFigFittingStates,[saveDir '/FittingStatesSmall.fig']);
+saveas(hFigFittingStates,[saveDir '/FittingStatesSmall.png']);
+saveas(hFigCustomStates,[saveDir '/CustomStatesSmall.fig']);
+saveas(hFigCustomStates,[saveDir '/CustomStatesSmall.png']);
 fprintf(['Grafik berhasil disimpan di:']); saveDir
 else
     fprintf(['Grafik TIDAK disimpan.\n Jika masih ingin menyimpan, simpan secara manual atau jalankan ulang script [F5].\n']);
