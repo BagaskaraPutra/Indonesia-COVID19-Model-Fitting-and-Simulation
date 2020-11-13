@@ -4,3 +4,7 @@ function indexCell = findIndexFromCell(sourceCell,desiredValue)
       indexCell = i;
     end
   end
+  if(i==numel(sourceCell) && ~exist('indexCell','var'))
+    indexCell = false;
+  end
+end
