@@ -96,7 +96,7 @@ end
 val = k{end}; k(end) = [];
 
 % [EDITABLE] keterangan simulasi berdasarkan konfigurasi fitting & simulasi lockdown
-keteranganSimulasi = ['StartFit' datestr(k{1}.timeFit{1},'yyyy-mm-dd') ...
+keteranganSimulasi = ['CheckStartFit' datestr(k{1}.timeFit{1},'yyyy-mm-dd') ...
                     'EndFit' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd')];
 if(exist('lockdown'))
    keteranganSimulasi = [keteranganSimulasi ...
@@ -112,7 +112,7 @@ end
 
 %% [EDITABLE] Upper bound of parameter for estimation constraint
 for i=1:numel(k) 
-    k{i}.ubParam = 1*ones(1,size(model.paramName,2));
+    k{i}.ubParam = 0.5*ones(1,size(model.paramName,2));
 end
 % If you want to manually set parameter: 
 % k{1}.ubParam(find(strcmp(model.paramName, 'beta'))) = 1; OR k{1}.ubParam(1) = 1;
