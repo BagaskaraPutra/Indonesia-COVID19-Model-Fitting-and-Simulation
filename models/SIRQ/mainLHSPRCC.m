@@ -3,7 +3,7 @@ clear all; close all; mainDir = pwd;
 addpath('../../commonFunctions');
 addpath('../../commonFunctions/LHS-PRCC');
 %% [EDITABLE] Sample size N
-runs=100;
+runs=500; %100;
 %% [EDITABLE] Load Model Parameters and Variables
 model.analyzeThisOutput = 'I'; % Chosen output variable name to do PRCC analysis
 alpha = 0.05; %threshold for significant PRCCs (uncorrelated < alpha)
@@ -12,10 +12,10 @@ model = loadModel(model); cd(mainDir);
 model = loadPRCCconfig(model,[model.dir '/PRCCconfig.txt']); %contains config for PRCC min,baseline,max,initial
 
 % Parameter Labels 
-PRCC_var = model.paramLabel;
+PRCC_var=model.paramLabel;
 
 % Variable Labels
-y_var_label = model.allStateName;
+y_var_label=model.allStateName;
 
 %% [EDITABLE] TIME SPAN OF THE SIMULATION
 t_end=4000; % length of the simulations
@@ -59,7 +59,7 @@ end
 [prcc sign sign_label]=PRCC(LHSmatrix,model,time_points,PRCC_var,alpha);
 % https://www.mathworks.com/matlabcentral/answers/376781-too-many-input-arguments-error
 
-save(['PRCCofOutputVar_' model.analyzeThisOutput '.mat']);
-
 % PRCC_PLOT(X,Y,s,PRCC_var,y_var)
-% PRCC_PLOT(LHSmatrix,model.state.(analyzeThisOutput).lhs,length(time_points),PRCC_var,y_var_label)
+% PRCC_PLOT(LHSmatrix,model.state.(model.analyzeThisOutput).lhs,length(time_points),PRCC_var,model.analyzeThisOutput)
+
+save(['PRCCofOutputVar_' model.analyzeThisOutput '.mat']);
