@@ -23,3 +23,12 @@ r_NQ_ND
 r_I_Q
 gamma
 muI
+[paramLabel]:
+\beta
+r_{S,NQ}
+r_{NQ,S}
+r_{NQ,Q}
+r_{NQ,ND}
+r_{I,Q}
+\gamma
+\mu_I
