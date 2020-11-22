@@ -11,7 +11,7 @@
 % modified by Bagaskara P P, November 17 2020
 % plot sorted parameters from most to least significant 
 
-function [prcc,sign,sign_label,hFig]=PRCC(LHSmatrix,model,time_points,PRCC_var,alpha)
+function [prcc,sign,sign_label,hFig]=PRCC(LHSmatrix,model,time_points,PRCC_var,alpha,orientation)
 s = 1:length(time_points); % index for time points
 Y = model.state.(model.analyzeThisOutput).lhs; % desired analyzed output LHS
 Y=Y(s,:)';% Define the output. Comment out if the Y is already 
@@ -96,8 +96,16 @@ for r=1:length(s)
 
     hFig{2}.name = 'sortedPRCC';
     hFig{2}.figure{r} =  figure();
-    bar(prccSortedValue); title(['Most to Least Significant ' c1]);
-        set(gca,'XTickLabel',prccSorted_var,'XTick',[1:k]);
+    switch orientation
+        case 'horizontal'
+            barh(prccSortedValue); title(['Most to Least Significant ' c1]);
+            xlabel('PRCC values');
+            set(gca,'YTickLabel',prccSorted_var,'YTick',[1:k]);
+        otherwise
+            bar(prccSortedValue); title(['Most to Least Significant ' c1]);
+            ylabel('PRCC values');
+            set(gca,'XTickLabel',prccSorted_var,'XTick',[1:k]);
+    end
 end
 
 end
