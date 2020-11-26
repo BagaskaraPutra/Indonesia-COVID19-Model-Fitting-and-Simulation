@@ -43,15 +43,15 @@ global Npop; Npop = 273.52e6; % Indonesia total population
 % ubah startDate & endDate sesuai kebijakan. Jika tidak tahu endDate, tidak usah diisi, data terakhir yang diambil.
 % numDays = berapa hari akan disimulasikan setelah hari terakhir kebijakan?
 k{1}.name = 'Sebelum Lonjakan'; 
-k{1}.startDate = '2020-04-30'; %k{1}.endDate = '2020-08-27'; k{1}.numDays = 14;
-% k{2}.name = 'Lonjakan Long Weekend'; 
-% k{2}.startDate = '2020-08-28';
+k{1}.startDate = '2020-04-30'; k{1}.endDate = '2020-11-07'; k{1}.numDays = 14;
+k{2}.name = 'Lonjakan Long Weekend'; 
+k{2}.startDate = '2020-11-08'; %'2020-08-28';
 rfi = numel(k); % real fitting index: indeks kebijakan terakhir yang merupakan data fitting nyata
 
 lockdown.index = rfi+1;
 % lockdown.startDate = '2020-07-27';
-lockdown.startDate = '2020-09-14'; 
-% lockdown.startDate = '2020-11-24'; 
+% lockdown.startDate = '2020-09-14'; 
+lockdown.startDate = '2020-11-30'; 
 % lockdown.startDate = '2020-12-25'; 
 % lockdown.startDate = '2021-02-08'; 
 % lockdown.startDate = '2021-03-14'; 
@@ -90,9 +90,9 @@ k{rfi}.numDays = datenum(k{lockdown.index}.timeFit{1}-k{rfi}.timeFit{end})+lockd
 % supaya tanggal akhir simulasi tanpa lockdown = dengan lockdown
 
 % [EDITABLE] keterangan simulasi berdasarkan konfigurasi fitting & simulasi lockdown
-keteranganSimulasi = ['MulaiFiting' datestr(k{1}.timeFit{1},'yyyy-mm-dd') ...
-            'AkhirFitting' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd') ...
-          'Lockdown' lockdown.startDate 'Durasi' num2str(lockdown.numDays)];
+keteranganSimulasi = ['StartFiting' datestr(k{1}.timeFit{1},'yyyy-mm-dd') ...
+            'EndFitting' datestr(k{rfi}.timeFit{end},'yyyy-mm-dd') ...
+          'Lockdown' lockdown.startDate 'Duration' num2str(lockdown.numDays)];
 if(softwareName == 'matlab')
     keteranganSimulasi = ['Matlab_', keteranganSimulasi];
 else
@@ -261,11 +261,17 @@ end
 k{1}.vlColor = 'g';
 k{2}.vlColor = lightblueDef;
 k{3}.vlColor = yellowDef;
-% k{4}.vlColor = 'b';
-% k{5}.vlColor = orangeDef;
-% k{6}.vlColor = 'k';
-% k{7}.vlColor = brownDef;
-% k{8}.vlColor = 'm';
+k{4}.vlColor = 'b';
+k{5}.vlColor = orangeDef;
+k{6}.vlColor = 'k';
+k{7}.vlColor = brownDef;
+k{8}.vlColor = 'm';
+for i=1:numel(k) % only choose struct containing Yest field
+    if(~isfield(k{i},'Yest'))
+        k = k(1:i-1);
+        break;
+    end
+end
 
 % [EDITABLE] Index untuk meletakkan cursor secara otomatis pada nilai maksimum figure
 cursorIndexMax{1}.kebijakan = rfi; % indeks kebijakan tanpa lockdown yang akan diberi cursor
