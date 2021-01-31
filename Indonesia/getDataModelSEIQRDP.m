@@ -12,13 +12,15 @@ function [k] = getDataModelSEIQRDP(download)
 Location = 'Indonesia';
 status = {'confirmed','deaths','recovered'};
 address = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/';
+% address = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/';
 ext = '.csv';
 global softwareName;
 
 filename = ['time_series_covid19_',status{1},'_global'];
 fullName = [address,filename,ext];
 if(download)
-    urlwrite(fullName,[filename,ext]);
+%     urlwrite(fullName,[filename,ext]);
+    websave([filename,ext], fullName);
 end
 if(softwareName == 'matlab')
    opts = detectImportOptions([filename,ext]);
@@ -39,7 +41,8 @@ for ii=1:numel(status)
     filename = ['time_series_covid19_',status{ii},'_global'];
     fullName = [address,filename,ext];
     if(download)
-        urlwrite(fullName,[filename,ext]);
+%         urlwrite(fullName,[filename,ext]);
+        websave([filename,ext], fullName);
     end
     if strcmpi(status{ii},'Confirmed')
         if(softwareName == 'matlab')
