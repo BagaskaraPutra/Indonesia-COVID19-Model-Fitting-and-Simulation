@@ -84,12 +84,16 @@ function k = plotAllStates(k,model, hFig,cursorMaxIndex)
             kebijakan.peak = {};
             for cIdx=1:numel(cursorKebijakan.name)
                 kebijakan.peak{cIdx}.name = cursorKebijakan.name{cIdx};
-                kebijakan.peak{cIdx}.y = max(kebijakan.Yest(:,find(strcmp(model.allStateName,cursorKebijakan.name{cIdx}))));
-                kebijakan.peak{cIdx}.x = find(kebijakan.Yest(:,find(strcmp(model.allStateName,cursorKebijakan.name{cIdx})))==kebijakan.peak{cIdx}.y);
+                [kebijakan.peak{cIdx}.y kebijakan.peak{cIdx}.x] = max(kebijakan.Yest(:,find(strcmp(model.allStateName,cursorKebijakan.name{cIdx}))));
                 hLine = estPlot(find(strcmp(model.allStateName,cursorKebijakan.name{cIdx})));
                 if(softwareName == 'matlab')
                     cursorKebijakan.dTip{cIdx} = createDatatip(dcmObj,hLine);
-                    cursorKebijakan.dTip{cIdx}.Position = [kebijakan.peak{cIdx}.x kebijakan.peak{cIdx}.y 0];
+%                     cursorKebijakan.dTip{cIdx}.Position = [kebijakan.peak{cIdx}.x kebijakan.peak{cIdx}.y 0];
+                    if(kebijakan.peak{cIdx}.y <= 0)
+                        cursorKebijakan.dTip{cIdx}.Position = [1 kebijakan.peak{cIdx}.y 0];
+                    else
+                        cursorKebijakan.dTip{cIdx}.Cursor.DataIndex = kebijakan.peak{cIdx}.x;  
+                    end
                 end
             end
         end

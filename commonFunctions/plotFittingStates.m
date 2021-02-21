@@ -69,25 +69,22 @@ function k = plotFittingStates(k,model, hFig,cursorMaxIndex)
         end
         kebijakan.varName = [fittingLegend estLegend];
         
-%         if(cursorKebijakan.bool)
-%             kebijakan.peak.y = max(kebijakan.Yest(:,find(strcmp(model.allStateName,cursorKebijakan.name))));
-%             kebijakan.peak.x = find(kebijakan.Yest(:,find(strcmp(model.allStateName,cursorKebijakan.name)))==kebijakan.peak.y);
-%             hLine = estPlot(find(strcmp(model.fitStateName,cursorKebijakan.name)));
-%             if(softwareName == 'matlab')
-%                 cursorKebijakan.dTip = createDatatip(dcmObj,hLine);
-%                 cursorKebijakan.dTip.Position = [kebijakan.peak.x kebijakan.peak.y 0];
-%             end
-%         end
         if(cursorKebijakan.bool)
             kebijakan.peak = {};
             for cIdx=1:numel(cursorKebijakan.name)
                 kebijakan.peak{cIdx}.name = cursorKebijakan.name{cIdx};
-                kebijakan.peak{cIdx}.y = max(kebijakan.Yest(:,find(strcmp(model.allStateName,cursorKebijakan.name{cIdx}))));
-                kebijakan.peak{cIdx}.x = find(kebijakan.Yest(:,find(strcmp(model.allStateName,cursorKebijakan.name{cIdx})))==kebijakan.peak{cIdx}.y);
+                [kebijakan.peak{cIdx}.y kebijakan.peak{cIdx}.x] = max(kebijakan.Yest(:,find(strcmp(model.allStateName,cursorKebijakan.name{cIdx}))));
+                if(isempty(find(strcmp(model.fitStateName,cursorKebijakan.name{cIdx}))) )
+                    break;
+                end
                 hLine = estPlot(find(strcmp(model.fitStateName,cursorKebijakan.name{cIdx})));
                 if(softwareName == 'matlab')
                     cursorKebijakan.dTip{cIdx} = createDatatip(dcmObj,hLine);
-                    cursorKebijakan.dTip{cIdx}.Position = [kebijakan.peak{cIdx}.x kebijakan.peak{cIdx}.y 0];
+                    if(kebijakan.peak{cIdx}.y <= 0)
+                        cursorKebijakan.dTip{cIdx}.Position = [1 kebijakan.peak{cIdx}.y 0];
+                    else
+                        cursorKebijakan.dTip{cIdx}.Cursor.DataIndex = kebijakan.peak{cIdx}.x;  
+                    end
                 end
             end
         end
